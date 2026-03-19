@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Home | Facility Manager{% endblock %}
+
+{% block content %}
+    <h1>Welcome to Facility Manager</h1>
+    <p>Your centralized system for managing facilities, assets, inventory, and maintenance operations.</p>
+
+    <div style="margin-top: 20px;">
+        <ul>
+            <li><a href="{% url 'common:home' %}">Home</a></li>
+        </ul>
+    </div>
+{% endblock %}
