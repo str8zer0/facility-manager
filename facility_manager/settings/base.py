@@ -14,28 +14,19 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# Initialise environment variables
-env = environ.Env(
-    DEBUG=(bool, False)
-)
+# Initialize environment reader
+env = environ.Env()
 
 # Read .env file
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
-
-raw_hosts = env("ALLOWED_HOSTS", default="")
-ALLOWED_HOSTS = raw_hosts.split() if raw_hosts else []
-
+SECRET_KEY = env("SECRET_KEY")
 
 # Application definition
 
@@ -144,3 +135,5 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
