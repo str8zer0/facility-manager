@@ -1,0 +1,89 @@
+from django import forms
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.models import Group
+
+User = get_user_model()
+
+
+class UserRoleForm(UserChangeForm):
+    role = forms.ChoiceField(required=False)
+
+    class Meta:
+        model = User
+        fields = ("email", "role", "is_active")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Load only role groups
+        role_groups = Group.objects.filter(name__in=settings.ROLE_GROUPS)
+        self.fields["role"].choices = [("", "---------")] + [(g.name, g.name) for g in role_groups]
+
+        # Pre-select current role
+        if self.instance and self.instance.pk:
+            user_groups = self.instance.groups.filter(name__in=settings.ROLE_GROUPS).values_list("name", flat=True)
+            if user_groups:
+                self.fields["role"].initial = user_groups[0]
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        selected_role = self.cleaned_data.get("role")
+
+        def save_m2m():
+            # Call original _save_m2m
+            self._save_m2m()
+
+            # Remove user from all role groups defined in settings
+            user.groups.remove(*Group.objects.filter(name__in=settings.ROLE_GROUPS))
+
+            # Assign selected role
+            if selected_role:
+                try:
+                    group = Group.objects.get(name=selected_role)
+                    user.groups.add(group)
+                except Group.DoesNotExist:
+                    pass
+
+        self.save_m2m = save_m2m
+
+        if commit:
+            user.save()
+            self.save_m2m()
+        return user
+
+
+class UserRoleAddForm(UserCreationForm):
+    role = forms.ChoiceField(required=False)
+
+    class Meta:
+        model = User
+        fields = ("email", "role", "is_active")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        role_groups = Group.objects.filter(name__in=settings.ROLE_GROUPS)
+        self.fields["role"].choices = [("", "---------")] + [(g.name, g.name) for g in role_groups]
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        selected_role = self.cleaned_data.get("role")
+
+        def save_m2m():
+            # Call original _save_m2m
+            self._save_m2m()
+
+            if selected_role:
+                try:
+                    group = Group.objects.get(name=selected_role)
+                    user.groups.add(group)
+                except Group.DoesNotExist:
+                    pass
+
+        self.save_m2m = save_m2m
+
+        if commit:
+            user.save()
+            self.save_m2m()
+        return user

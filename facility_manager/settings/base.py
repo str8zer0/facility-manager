@@ -125,6 +125,11 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Custom user model
+AUTH_USER_MODEL = "accounts.User"
+
+# Role-based groups for permissions
+ROLE_GROUPS = ["Admin", "Manager", "Technician", "Viewer"]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
@@ -136,4 +141,5 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
