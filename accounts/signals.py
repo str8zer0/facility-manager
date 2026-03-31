@@ -15,9 +15,6 @@ def create_default_groups(sender, **kwargs):
     Create default user groups (roles) after migrations.
     This runs once after migrate.
     """
-    # if sender.label != "accounts":
-    #     return
-
     for group_name in settings.ROLE_GROUPS:
         Group.objects.get_or_create(name=group_name)
 
@@ -28,7 +25,7 @@ def assign_group_permissions():
     admin_group = Group.objects.get(name="Admin")
     manager_group = Group.objects.get(name="Manager")
     technician_group = Group.objects.get(name="Technician")
-    viewer_group = Group.objects.get(name="Viewer")
+    staff_group = Group.objects.get(name="Staff")
 
     # Admin → full permissions (but NOT superuser)
     admin_group.permissions.set(Permission.objects.all())
@@ -73,9 +70,16 @@ def assign_group_permissions():
         )
     )
 
-    # Viewer → read-only
-    viewer_group.permissions.set(
-        Permission.objects.filter(codename__startswith="view_")
+    # Staff → can create work orders, view limited data
+    staff_group.permissions.set(
+        Permission.objects.filter(
+            codename__in=[
+                "add_workorder",
+                "view_workorder",
+                "view_asset",
+                "view_room",
+            ]
+        )
     )
 
 
@@ -101,15 +105,16 @@ def enforce_staff_status(sender, instance, action, **kwargs):
     Ensure only Admin group users have is_staff=True.
     Everyone else is_staff=False.
     """
-    if action in ["post_add", "post_remove", "post_clear"]:
-        admin_group = Group.objects.get(name="Admin")
-        is_admin = instance.groups.filter(id=admin_group.id).exists()
+    if action not in ["post_add", "post_remove", "post_clear"]:
+        return
 
-        if is_admin:
-            if not instance.is_staff:
-                instance.is_staff = True
-                instance.save(update_fields=["is_staff"])
-        else:
-            if instance.is_staff:
-                instance.is_staff = False
-                instance.save(update_fields=["is_staff"])
+    admin_group = Group.objects.get(name="Admin")
+    is_admin = instance.groups.filter(id=admin_group.id).exists()
+
+    if is_admin and not instance.is_staff:
+        instance.is_staff = True
+        instance.save(update_fields=["is_staff"])
+
+    if not is_admin and instance.is_staff:
+        instance.is_staff = False
+        instance.save(update_fields=["is_staff"])

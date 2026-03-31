@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard - MMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8 text-center text-md-start">
+            <h2 class="fw-bold">Staff Dashboard</h2>
+            <p class="text-muted">Request maintenance services and track your submissions.</p>
+        </div>
+        <div class="col-md-4 text-center text-md-end">
+            <button class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                <i class="fas fa-plus-circle me-1"></i> New Maintenance Request
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center p-3 h-100">
+                <div class="card-body">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                        <i class="fas fa-paper-plane text-primary"></i>
+                    </div>
+                    <h6 class="text-muted mb-1">Total Submitted</h6>
+                    <h3 class="mb-0">12</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center p-3 h-100">
+                <div class="card-body">
+                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                        <i class="fas fa-hourglass-half text-warning"></i>
+                    </div>
+                    <h6 class="text-muted mb-1">In Progress</h6>
+                    <h3 class="mb-0">4</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center p-3 h-100">
+                <div class="card-body">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                    <h6 class="text-muted mb-1">Completed</h6>
+                    <h3 class="mb-0">8</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Requests List -->
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">My Submitted Requests</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Request #</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="ps-4 fw-bold">#REQ-2051</td>
+                            <td>Mar 29, 2026</td>
+                            <td>Broken chair in Conference Room 2B</td>
+                            <td><span class="badge bg-secondary rounded-pill">Pending Approval</span></td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-sm btn-outline-primary">View</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 fw-bold">#REQ-2048</td>
+                            <td>Mar 25, 2026</td>
+                            <td>Water cooler empty in West Wing</td>
+                            <td><span class="badge bg-info rounded-pill">In Progress</span></td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-sm btn-outline-primary">View</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4 fw-bold">#REQ-2040</td>
+                            <td>Mar 20, 2026</td>
+                            <td>Software update on Desktop #45</td>
+                            <td><span class="badge bg-success rounded-pill">Resolved</span></td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-sm btn-outline-primary">View</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Inspection #{{ inspection.id }} - Facility Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'common:home' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'maintenance:inspection_list' %}">Inspections</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'maintenance:inspection_detail' inspection.pk %}">#{{ inspection.id }}</a></li>
+            <li class="breadcrumb-item active">Complete</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">Complete Inspection</h1>
+            <p class="text-muted mb-0">Template: <strong>{{ inspection.template.name }}</strong> | Location: <strong>{{ inspection.location|default:"-" }}</strong></p>
+        </div>
+        <a href="{% url 'maintenance:inspection_detail' inspection.pk %}" class="btn btn-light">
+            <i class="fas fa-times me-1"></i> Cancel
+        </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <!-- Inspection Results -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0 py-3 text-center">
+                        <h5 class="card-title mb-0">Checklist Results</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        {{ formset.management_form }}
+                        
+                        {% for form in formset %}
+                        <div class="inspection-item-row p-4 mb-4 border rounded bg-white shadow-sm">
+                            {{ form.id }}
+                            <div class="row g-4">
+                                <div class="col-md-12 border-bottom pb-2 mb-3">
+                                    <h6 class="fw-bold mb-0">{{ form.instance.item.text }}</h6>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Status</label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}<div class="text-danger small mt-1">{{ form.status.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-7">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Notes</label>
+                                    {{ form.notes }}
+                                    {% if form.notes.errors %}<div class="text-danger small mt-1">{{ form.notes.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-12 mt-3">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Photo Attachment</label>
+                                    {{ form.photo }}
+                                    {% if form.photo.errors %}<div class="text-danger small mt-1">{{ form.photo.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary & Completion -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 1.5rem;">
+                    <div class="card-header bg-transparent border-0 py-3 text-center">
+                        <h5 class="card-title mb-0">Inspection Summary</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Performed At</label>
+                            {{ complete_form.performed_at }}
+                            {% if complete_form.performed_at.errors %}<div class="text-danger small mt-1">{{ complete_form.performed_at.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Final Status</label>
+                            {{ complete_form.status }}
+                            {% if complete_form.status.errors %}<div class="text-danger small mt-1">{{ complete_form.status.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Overall Summary Notes</label>
+                            {{ complete_form.notes }}
+                            {% if complete_form.notes.errors %}<div class="text-danger small mt-1">{{ complete_form.notes.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg py-3">
+                                <i class="fas fa-check-circle me-1"></i> Save Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), select, textarea').forEach(el => {
+        el.classList.add(el.tagName === 'SELECT' ? 'form-select' : 'form-control');
+    });
+    document.querySelectorAll('input[type="checkbox"]').forEach(el => {
+        el.classList.add('form-check-input');
+    });
+</script>
+{% endblock %}

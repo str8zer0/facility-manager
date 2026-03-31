@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{% if action == 'Create' %}New Template{% else %}Edit Template{% endif %} - Facility Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'common:home' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'maintenance:inspectiontemplate_list' %}">Inspection Templates</a></li>
+            {% if action == 'Edit' %}
+            <li class="breadcrumb-item"><a href="{% url 'maintenance:inspectiontemplate_detail' form.instance.pk %}">{{ form.instance.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active">{% if action == 'Create' %}New{% else %}Edit{% endif %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0">{% if action == 'Create' %}Create Inspection Template{% else %}Edit Template{% endif %}</h5>
+                </div>
+                <div class="card-body pt-0">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">Template Name</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% if action == 'Edit' %}{% url 'maintenance:inspectiontemplate_detail' form.instance.pk %}{% else %}{% url 'maintenance:inspectiontemplate_list' %}{% endif %}" class="btn btn-light px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">{% if action == 'Create' %}Create Template{% else %}Save Changes{% endif %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input, textarea').forEach(el => {
+        el.classList.add('form-control');
+    });
+</script>
+{% endblock %}

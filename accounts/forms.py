@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import Group
+from accounts.models import Profile
 
 User = get_user_model()
 
@@ -87,3 +88,40 @@ class UserRoleAddForm(UserCreationForm):
             user.save()
             self.save_m2m()
         return user
+
+
+class RegisterForm(forms.ModelForm):
+    password1 = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = User
+        fields = ["email"]
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("password1") != cleaned.get("password2"):
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+
+        if commit:
+            user.save()
+
+            # Assign default role: Staff
+            try:
+                staff_group = Group.objects.get(name="Staff")
+                user.groups.add(staff_group)
+            except Group.DoesNotExist:
+                pass
+
+        return user
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ["first_name", "last_name", "department", "job", "phone", "profile_picture"]

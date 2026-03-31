@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Asset{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'assets:asset_list' %}">Assets</a></li>
+            {% if action == "Edit" %}
+                <li class="breadcrumb-item"><a href="{% url 'assets:asset_detail' form.instance.pk %}">{{ form.instance.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ action }} Asset</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h1 class="h4 mb-0">{{ action }} Asset</h1>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Basic Info -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">{{ form.name.label }}</label>
+                                {{ form.name }}
+                                {% for error in form.name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label fw-semibold">{{ form.category.label }}</label>
+                                {{ form.category }}
+                                {% for error in form.category.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            
+                            <!-- Status & Location -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">{{ form.status.label }}</label>
+                                {{ form.status }}
+                                {% for error in form.status.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.tag.id_for_label }}" class="form-label fw-semibold">{{ form.tag.label }}</label>
+                                {{ form.tag }}
+                                {% for error in form.tag.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.room.id_for_label }}" class="form-label fw-semibold">{{ form.room.label }}</label>
+                                {{ form.room }}
+                                {% for error in form.room.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+
+                            <!-- Technical Specs -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.serial_number.id_for_label }}" class="form-label fw-semibold">{{ form.serial_number.label }}</label>
+                                {{ form.serial_number }}
+                                {% for error in form.serial_number.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.manufacturer.id_for_label }}" class="form-label fw-semibold">{{ form.manufacturer.label }}</label>
+                                {{ form.manufacturer }}
+                                {% for error in form.manufacturer.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.model_number.id_for_label }}" class="form-label fw-semibold">{{ form.model_number.label }}</label>
+                                {{ form.model_number }}
+                                {% for error in form.model_number.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+
+                            <!-- Dates -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.purchase_date.id_for_label }}" class="form-label fw-semibold">{{ form.purchase_date.label }}</label>
+                                {{ form.purchase_date }}
+                                {% for error in form.purchase_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.installation_date.id_for_label }}" class="form-label fw-semibold">{{ form.installation_date.label }}</label>
+                                {{ form.installation_date }}
+                                {% for error in form.installation_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.warranty_expiration.id_for_label }}" class="form-label fw-semibold">{{ form.warranty_expiration.label }}</label>
+                                {{ form.warranty_expiration }}
+                                {% for error in form.warranty_expiration.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+
+                            <!-- Assignment & Active -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.assigned_to.id_for_label }}" class="form-label fw-semibold">{{ form.assigned_to.label }}</label>
+                                {{ form.assigned_to }}
+                                {% for error in form.assigned_to.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex align-items-center">
+                                <div class="form-check form-switch mt-4">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label fw-semibold" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.notes.id_for_label }}" class="form-label fw-semibold">{{ form.notes.label }}</label>
+                                {{ form.notes }}
+                                {% for error in form.notes.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% if action == 'Edit' %}{% url 'assets:asset_detail' form.instance.pk %}{% else %}{% url 'assets:asset_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-1"></i> Save Asset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

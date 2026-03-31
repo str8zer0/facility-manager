@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{% if action == 'Create' %}New Work Order{% else %}Edit Work Order{% endif %} - Facility Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'common:home' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_list' %}">Work Orders</a></li>
+            {% if action == 'Edit' %}
+            <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_detail' form.instance.pk %}">#{{ form.instance.pk }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active">{% if action == 'Create' %}New{% else %}Edit{% endif %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0">{% if action == 'Create' %}Create New Work Order{% else %}Edit Work Order #{{ form.instance.id }}{% endif %}</h5>
+                </div>
+                <div class="card-body pt-0">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Title</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Priority</label>
+                                {{ form.priority }}
+                                {% if form.priority.errors %}<div class="text-danger small">{{ form.priority.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Status</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}<div class="text-danger small">{{ form.status.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Assigned To</label>
+                                {{ form.assigned_to }}
+                                {% if form.assigned_to.errors %}<div class="text-danger small">{{ form.assigned_to.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Due Date</label>
+                                {{ form.due_date }}
+                                {% if form.due_date.errors %}<div class="text-danger small">{{ form.due_date.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Location (Select one)</h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Building</label>
+                                {{ form.building }}
+                                {% if form.building.errors %}<div class="text-danger small">{{ form.building.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Room</label>
+                                {{ form.room }}
+                                {% if form.room.errors %}<div class="text-danger small">{{ form.room.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Asset</label>
+                                {{ form.asset }}
+                                {% if form.asset.errors %}<div class="text-danger small">{{ form.asset.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% if action == 'Edit' %}{% url 'maintenance:workorder_detail' form.instance.pk %}{% else %}{% url 'maintenance:workorder_list' %}{% endif %}" class="btn btn-light px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">{% if action == 'Create' %}Create Work Order{% else %}Save Changes{% endif %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple script to apply Bootstrap classes if not already applied by form_class or widget
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+        if (!el.classList.contains('btn')) {
+            el.classList.add('form-control');
+        }
+        if (el.tagName === 'SELECT') {
+            el.classList.remove('form-control');
+            el.classList.add('form-select');
+        }
+    });
+</script>
+{% endblock %}

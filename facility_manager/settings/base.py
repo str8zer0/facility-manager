@@ -129,7 +129,7 @@ USE_TZ = True
 AUTH_USER_MODEL = "accounts.User"
 
 # Role-based groups for permissions
-ROLE_GROUPS = ["Admin", "Manager", "Technician", "Viewer"]
+ROLE_GROUPS = ["Admin", "Manager", "Technician", "Staff"]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/

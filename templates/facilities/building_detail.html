@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}{{ building.name }} - Facility Manager{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'facilities:building_list' %}">Buildings</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ building.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Building Info -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Building Details</h5>
+                    {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'facilities:building_edit' building.pk %}"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'facilities:building_delete' building.pk %}"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-3">{{ building.name }}</h4>
+                    <p class="text-muted"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ building.address|default:"No address provided" }}</p>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small text-uppercase fw-bold">Manager</label>
+                        <div>
+                            {% if building.manager %}
+                                <i class="fas fa-user-tie me-2"></i>{{ building.manager.get_full_name|default:building.manager.email }}
+                            {% else %}
+                                <span class="text-muted small italic">No manager assigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small text-uppercase fw-bold">Description</label>
+                        <div class="mt-1 small">
+                            {{ building.description|linebreaks|default:"No description provided." }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <a href="{% url 'facilities:building_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rooms List -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Rooms in {{ building.name }}</h5>
+                    {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                        <i class="fas fa-plus me-1"></i> Add Room
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Room Name</th>
+                                    <th>Floor</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for room in rooms %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">
+                                        <a href="{% url 'facilities:room_detail' room.pk %}" class="text-decoration-none">{{ room.name }}</a>
+                                    </td>
+                                    <td>
+                                        {% if room.floor is not None %}
+                                            <span class="badge bg-light text-dark">Floor {{ room.floor }}</span>
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <a href="{% url 'facilities:room_detail' room.pk %}" class="btn btn-sm btn-outline-secondary" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                                            <a href="{% url 'facilities:room_edit' room.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'facilities:room_delete' room.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">No rooms added to this building yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+<!-- Add Room Modal -->
+<div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRoomModalLabel">Add New Room to {{ building.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'facilities:room_create' %}?building={{ building.pk }}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {% for field in room_form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Room</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

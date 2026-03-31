@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ template.name }} - Template Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'common:home' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'maintenance:inspectiontemplate_list' %}">Inspection Templates</a></li>
+            <li class="breadcrumb-item active">{{ template.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">{{ template.name }}</h1>
+            <p class="text-muted mb-0">{{ template.description|default:"No description" }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+            <a href="{% url 'maintenance:inspectiontemplate_update' template.pk %}" class="btn btn-outline-secondary">
+                <i class="fas fa-edit me-1"></i> Edit Template
+            </a>
+            <a href="{% url 'maintenance:inspectiontemplate_delete' template.pk %}" class="btn btn-outline-danger">
+                <i class="fas fa-trash me-1"></i> Delete
+            </a>
+            {% endif %}
+            <a href="{% url 'maintenance:inspection_create' %}?template={{ template.pk }}" class="btn btn-primary">
+                <i class="fas fa-play me-1"></i> New Inspection
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Template Items</h5>
+            {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+            <a href="{% url 'maintenance:inspectionitem_create' template.pk %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus me-1"></i> Add Item
+            </a>
+            {% endif %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Item Label</th>
+                        <th>Type</th>
+                        <th class="text-center">Required</th>
+                        {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                        <th class="text-end">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="text-muted small">{{ forloop.counter }}</td>
+                        <td class="fw-bold">{{ item.text }}</td>
+                        <td>
+                            <span class="badge bg-light text-dark border">Standard Item</span>
+                        </td>
+                        <td class="text-center">
+                            <i class="fas fa-check-circle text-success small opacity-50"></i>
+                        </td>
+                        {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <a href="{% url 'maintenance:inspectionitem_update' item.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit Item">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'maintenance:inspectionitem_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Delete Item">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <p class="mb-0">This template has no items yet.</p>
+                            {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                            <a href="{% url 'maintenance:inspectionitem_create' template.pk %}" class="btn btn-sm btn-link mt-2">Add your first item</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

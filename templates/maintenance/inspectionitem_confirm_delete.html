@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Item - Facility Manager{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-trash-alt text-danger fa-4x"></i>
+                    </div>
+                    <h3 class="mb-3">Delete Item?</h3>
+                    <p class="text-muted mb-4">Are you sure you want to delete item <strong>"{{ item.text }}"</strong> from template <strong>"{{ item.template.name }}"</strong>?</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger py-2">Confirm Delete</button>
+                            <a href="{% url 'maintenance:inspectiontemplate_detail' item.template.pk %}" class="btn btn-light py-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

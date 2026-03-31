@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Inspection Templates - Facility Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'common:home' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Inspection Templates</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Inspection Templates</h1>
+        {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+        <a href="{% url 'maintenance:inspectiontemplate_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> New Template
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="row">
+                    {% for template in templates %}
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="icon-shape bg-light text-primary rounded-3 p-3">
+                                        <i class="fas fa-tasks fa-lg"></i>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li><a class="dropdown-menu-item dropdown-item small" href="{% url 'maintenance:inspectiontemplate_detail' template.pk %}"><i class="fas fa-eye me-2"></i>View</a></li>
+                                            {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                                            <li><a class="dropdown-menu-item dropdown-item small" href="{% url 'maintenance:inspectiontemplate_update' template.pk %}"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-menu-item dropdown-item small text-danger" href="{% url 'maintenance:inspectiontemplate_delete' template.pk %}"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <h5 class="card-title fw-bold mb-1">
+                                    <a href="{% url 'maintenance:inspectiontemplate_detail' template.pk %}" class="text-decoration-none text-dark">
+                                        {{ template.name }}
+                                    </a>
+                                </h5>
+                                <p class="text-muted small mb-3 text-truncate-2" style="height: 2.5rem;">{{ template.description|default:"No description provided." }}</p>
+                                <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                                    <span class="small text-muted"><i class="fas fa-list-ul me-1"></i> {{ template.items.count }} items</span>
+                                    <a href="{% url 'maintenance:inspection_create' %}?template={{ template.pk }}" class="btn btn-sm btn-outline-primary py-1">
+                                        Use Template
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-clipboard-check fa-4x text-light"></i>
+            </div>
+            <h4 class="text-muted">No inspection templates found</h4>
+            {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+            <p class="text-muted small mb-4">Create templates to standardize your inspection processes.</p>
+            <a href="{% url 'maintenance:inspectiontemplate_create' %}" class="btn btn-primary">Create First Template</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

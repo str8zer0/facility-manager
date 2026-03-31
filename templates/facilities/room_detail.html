@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ room.name }} - Facility Manager{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'facilities:building_list' %}">Buildings</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'facilities:building_detail' room.building.pk %}">{{ room.building.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ room.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-door-open me-2"></i>Room Details</h5>
+                    {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                    <div class="btn-group">
+                        <a href="{% url 'facilities:room_edit' room.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        <a href="{% url 'facilities:room_delete' room.pk %}" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash me-1"></i> Delete
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-1">Room Name</label>
+                            <h4 class="mb-0">{{ room.name }}</h4>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-1">Building</label>
+                            <h5 class="mb-0">
+                                <a href="{% url 'facilities:building_detail' room.building.pk %}" class="text-decoration-none">
+                                    <i class="fas fa-building me-1 small text-primary"></i>{{ room.building.name }}
+                                </a>
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-1">Floor</label>
+                            <p class="mb-0">
+                                {% if room.floor is not None %}
+                                    <span class="badge bg-light text-dark fs-6">Floor {{ room.floor }}</span>
+                                {% else %}
+                                    <span class="text-muted">Not specified</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">Description</label>
+                        <p class="text-dark">
+                            {{ room.description|linebreaks|default:"No description provided for this room." }}
+                        </p>
+                    </div>
+
+                    <div class="d-flex justify-content-start gap-2">
+                        <a href="{% url 'facilities:building_detail' room.building.pk %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Building
+                        </a>
+                        <a href="{% url 'facilities:room_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-list me-1"></i> All Rooms
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Room-specific content placeholder (Assets, Maintenance history etc) -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">Assets in this Room</h5>
+                </div>
+                <div class="card-body py-5 text-center text-muted">
+                    <i class="fas fa-tools fa-3x mb-3 opacity-25"></i>
+                    <p>Asset management integration coming soon.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

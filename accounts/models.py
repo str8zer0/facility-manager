@@ -18,6 +18,28 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+    @property
+    def role(self):
+        """
+        Custom property to easily check user's highest role in templates.
+        Returns 'ADMIN', 'MANAGER', 'TECHNICIAN', or 'STAFF'.
+        Returns None if no specific group is assigned.
+        """
+        if self.is_superuser:
+            return "ADMIN"
+        
+        groups = list(self.groups.values_list("name", flat=True))
+        if "Admin" in groups:
+            return "ADMIN"
+        if "Manager" in groups:
+            return "MANAGER"
+        if "Technician" in groups:
+            return "TECHNICIAN"
+        if "Staff" in groups:
+            return "STAFF"
+        
+        return None
+
 
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
