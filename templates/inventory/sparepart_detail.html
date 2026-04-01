@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Spare Part: {{ part.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb and Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Spare Parts</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ part.name }}</li>
+            </ol>
+        </nav>
+        <div class="mt-2 mt-md-0">
+            <a href="{% url 'inventory:movement_create' part.pk %}" class="btn btn-primary me-2">
+                <i class="fas fa-exchange-alt me-1"></i> Log Movement
+            </a>
+            {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
+                <a href="{% url 'inventory:sparepart_edit' part.pk %}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <a href="{% url 'inventory:sparepart_delete' part.pk %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i> Delete
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Part Details -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h2 class="h5 mb-0">Part Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Name</label>
+                            <span class="h5">{{ part.name }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Part Number</label>
+                            <span>{{ part.part_number|default:"N/A" }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Supplier</label>
+                            {% if part.supplier %}
+                                <a href="{% url 'inventory:supplier_detail' part.supplier.pk %}">{{ part.supplier.name }}</a>
+                            {% else %}
+                                <span class="text-muted">No supplier</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Current Stock</label>
+                            <span class="h4 badge {% if is_low_stock %}bg-danger{% else %}bg-success{% endif %}">
+                                {{ part.quantity }}
+                            </span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Min. Quantity</label>
+                            <span>{{ part.minimum_quantity }}</span>
+                        </div>
+                    </div>
+                    {% if is_low_stock %}
+                        <div class="alert alert-warning mt-4 mb-0 py-2">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Low stock alert!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Log Movement Quick Form (Hidden for now as there is a dedicated page, but could be added as a modal) -->
+        </div>
+
+        <!-- Movement History -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Recent Stock Movements</h2>
+                    <a href="{% url 'inventory:movement_list' %}?part={{ part.pk }}" class="btn btn-sm btn-outline-secondary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Date</th>
+                                    <th>Change</th>
+                                    <th>Reason</th>
+                                    <th class="pe-4">Work Order</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movement in movements %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <small class="text-muted d-block">{{ movement.timestamp|date:"M d, Y" }}</small>
+                                            <small class="text-muted">{{ movement.timestamp|time:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold {% if movement.change > 0 %}text-success{% else %}text-danger{% endif %}">
+                                                {% if movement.change > 0 %}+{% endif %}{{ movement.change }}
+                                            </span>
+                                        </td>
+                                        <td>{{ movement.get_reason_display }}</td>
+                                        <td class="pe-4">
+                                            {% if movement.work_order %}
+                                                <a href="{% url 'maintenance:workorder_detail' movement.work_order.pk %}" class="small">
+                                                    #{{ movement.work_order.pk }}
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-muted">
+                                            No stock movements recorded yet.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -49,8 +49,10 @@ class WorkOrder(models.Model):
         null=True,
         related_name="created_work_orders"
     )
-    assigned_to = models.ManyToManyField(
+    assigned_to = models.ForeignKey(
         User,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name="assigned_work_orders"
     )
@@ -103,8 +105,8 @@ class WorkOrderComment(models.Model):
         on_delete=models.SET_NULL,
         null=True
     )
-    timestamp = models.DateTimeField(auto_now_add=True)
     comment = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["timestamp"]
@@ -113,73 +115,15 @@ class WorkOrderComment(models.Model):
         return f"Comment by {self.user} on {self.timestamp}"
 
 
-class WorkOrderAttachment(models.Model):
-    work_order = models.ForeignKey(
-        WorkOrder,
-        on_delete=models.CASCADE,
-        related_name="attachments"
-    )
-    file = models.FileField(upload_to="workorder_attachments/")
-    uploaded_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True
-    )
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Attachment for {self.work_order}"
-
-
-class InspectionTemplate(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="created_inspection_templates"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.name
-
-
-class InspectionItem(models.Model):
-    template = models.ForeignKey(
-        InspectionTemplate,
-        on_delete=models.CASCADE,
-        related_name="items"
-    )
-    text = models.CharField(max_length=255)
-    order = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        ordering = ["order"]
-
-    def __str__(self):
-        return f"{self.template.name} – {self.text}"
-
-
 class Inspection(models.Model):
-    template = models.ForeignKey(
-        InspectionTemplate,
-        on_delete=models.PROTECT,
-        related_name="inspections"
-    )
+    title = models.CharField(max_length=255)
     performed_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="performed_inspections"
     )
-
     building = models.ForeignKey(
         Building,
         on_delete=models.SET_NULL,
@@ -208,42 +152,11 @@ class Inspection(models.Model):
         choices=InspectionStatus,
         default=InspectionStatus.SCHEDULED
     )
+    findings = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    notes = models.TextField(blank=True)
 
     class Meta:
         ordering = ["-timestamp"]
 
     def __str__(self):
-        return f"{self.template.name} – {self.timestamp}"
-
-
-class InspectionResult(models.Model):
-    inspection = models.ForeignKey(
-        Inspection,
-        on_delete=models.CASCADE,
-        related_name="results_for_inspection"
-    )
-    item = models.ForeignKey(
-        InspectionItem,
-        on_delete=models.CASCADE,
-        related_name="results_for_item"
-    )
-    status = models.CharField(
-        max_length=10,
-        choices=ResultStatus,
-        default=ResultStatus.NA
-    )
-    notes = models.TextField(blank=True)
-    photo = models.ImageField(
-        upload_to="inspection_photos/",
-        null=True,
-        blank=True
-    )
-
-    class Meta:
-        unique_together = ("inspection", "item")
-        ordering = ["item__order"]
-
-    def __str__(self):
-        return f"{self.item.text} – {self.status}"
+        return f"{self.title} – {self.get_status_display()}"

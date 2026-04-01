@@ -17,17 +17,17 @@
             <div class="card border-0 shadow-sm border-start border-4 border-warning h-100">
                 <div class="card-body">
                     <h6 class="text-muted text-uppercase small fw-bold">Open Work Orders</h6>
-                    <h2 class="mb-0">24</h2>
-                    <p class="mb-0 mt-2 small text-success"><i class="fas fa-arrow-up"></i> 5 since yesterday</p>
+                    <h2 class="mb-0">{{ open_work_orders.count }}</h2>
+                    <p class="mb-0 mt-2 small text-muted">Awaiting completion</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm border-start border-4 border-danger h-100">
                 <div class="card-body">
-                    <h6 class="text-muted text-uppercase small fw-bold">Overdue Inspections</h6>
-                    <h2 class="mb-0">7</h2>
-                    <p class="mb-0 mt-2 small text-danger"><i class="fas fa-exclamation-circle"></i> Requires immediate action</p>
+                    <h6 class="text-muted text-uppercase small fw-bold">Critical Work Orders</h6>
+                    <h2 class="mb-0">{{ critical_work_orders.count }}</h2>
+                    <p class="mb-0 mt-2 small text-danger"><i class="fas fa-exclamation-circle"></i> Requires immediate attention</p>
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
             <div class="card border-0 shadow-sm border-start border-4 border-info h-100">
                 <div class="card-body">
                     <h6 class="text-muted text-uppercase small fw-bold">Low Stock Items</h6>
-                    <h2 class="mb-0">12</h2>
+                    <h2 class="mb-0">{{ low_stock_parts.count }}</h2>
                     <p class="mb-0 mt-2 small text-muted">Items below reorder point</p>
                 </div>
             </div>
@@ -51,29 +51,29 @@
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
-                        <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex align-items-center">
+                        <a href="{% url 'assets:asset_list' %}" class="list-group-item list-group-item-action border-0 px-0 d-flex align-items-center">
                             <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
                                 <i class="fas fa-building text-primary"></i>
                             </div>
                             Manage Assets
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex align-items-center">
+                        <a href="{% url 'inventory:sparepart_list' %}" class="list-group-item list-group-item-action border-0 px-0 d-flex align-items-center">
                             <div class="bg-success bg-opacity-10 p-2 rounded me-3">
                                 <i class="fas fa-boxes text-success"></i>
                             </div>
                             Inventory Control
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex align-items-center">
+                        <a href="{% url 'facilities:room_list' %}" class="list-group-item list-group-item-action border-0 px-0 d-flex align-items-center">
                             <div class="bg-info bg-opacity-10 p-2 rounded me-3">
                                 <i class="fas fa-door-open text-info"></i>
                             </div>
                             Room Assignments
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action border-0 px-0 d-flex align-items-center">
+                        <a href="{% url 'maintenance:workorder_list' %}" class="list-group-item list-group-item-action border-0 px-0 d-flex align-items-center">
                             <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
                                 <i class="fas fa-file-alt text-warning"></i>
                             </div>
-                            Generate Reports
+                            Work Orders
                         </a>
                     </div>
                 </div>
@@ -84,15 +84,15 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Recent Maintenance Requests</h5>
-                    <a href="#" class="btn btn-sm btn-primary">View All</a>
+                    <h5 class="card-title mb-0">Recent Open Work Orders</h5>
+                    <a href="{% url 'maintenance:workorder_list' %}" class="btn btn-sm btn-primary">View All</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover small">
                             <thead>
                                 <tr>
-                                    <th>Request ID</th>
+                                    <th>Work Order</th>
                                     <th>Asset</th>
                                     <th>Priority</th>
                                     <th>Technician</th>
@@ -100,27 +100,29 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for wo in open_work_orders %}
                                 <tr>
-                                    <td>#REQ-1025</td>
-                                    <td>HVAC System - North Wing</td>
-                                    <td><span class="badge bg-danger">High</span></td>
-                                    <td>John Doe</td>
-                                    <td><span class="badge bg-info">Assigned</span></td>
+                                    <td>
+                                        <a href="{% url 'maintenance:workorder_detail' wo.pk %}" class="fw-bold text-decoration-none">
+                                            #{{ wo.id }}
+                                        </a>
+                                    </td>
+                                    <td>{{ wo.asset.name|default:wo.asset_text|truncatechars:30 }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if wo.priority == 'CRITICAL' %}danger{% elif wo.priority == 'HIGH' %}warning{% else %}info{% endif %}">
+                                            {{ wo.get_priority_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ wo.assigned_to.email|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ wo.get_status_display }}</span>
+                                    </td>
                                 </tr>
+                                {% empty %}
                                 <tr>
-                                    <td>#REQ-1024</td>
-                                    <td>Elevator #2</td>
-                                    <td><span class="badge bg-warning">Medium</span></td>
-                                    <td>-</td>
-                                    <td><span class="badge bg-secondary">Pending</span></td>
+                                    <td colspan="5" class="text-center text-muted py-4">No open work orders found.</td>
                                 </tr>
-                                <tr>
-                                    <td>#REQ-1023</td>
-                                    <td>Emergency Lighting</td>
-                                    <td><span class="badge bg-info">Low</span></td>
-                                    <td>Jane Smith</td>
-                                    <td><span class="badge bg-success">Completed</span></td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Stock Movements{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 px-3">
+        <h1 class="h3 mb-0">Stock Movements</h1>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4 mx-3">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="part" class="form-label small fw-bold text-uppercase text-muted">Spare Part</label>
+                    <select name="part" id="part" class="form-select form-select-sm">
+                        <option value="">All Parts</option>
+                        {% for p in parts %}
+                            <option value="{{ p.pk }}" {% if current_filters.part == p.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ p.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="reason" class="form-label small fw-bold text-uppercase text-muted">Reason</label>
+                    <select name="reason" id="reason" class="form-select form-select-sm">
+                        <option value="">All Reasons</option>
+                        {% for value, label in reason_choices %}
+                            <option value="{{ value }}" {% if current_filters.reason == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="d-grid gap-2 d-md-block">
+                        <button type="submit" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-filter me-1"></i> Filter
+                        </button>
+                        <a href="{% url 'inventory:movement_list' %}" class="btn btn-sm btn-outline-secondary">
+                            Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Movement Table -->
+    <div class="card border-0 shadow-sm mx-3">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Timestamp</th>
+                            <th>Spare Part</th>
+                            <th>Change</th>
+                            <th>Reason</th>
+                            <th class="pe-4">Work Order</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movement in movements %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">{{ movement.timestamp|date:"M d, Y" }}</div>
+                                    <small class="text-muted">{{ movement.timestamp|time:"H:i" }}</small>
+                                </td>
+                                <td>
+                                    <a href="{% url 'inventory:sparepart_detail' movement.part.pk %}" class="text-decoration-none fw-semibold">
+                                        {{ movement.part.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge {% if movement.change > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                        {% if movement.change > 0 %}+{% endif %}{{ movement.change }}
+                                    </span>
+                                </td>
+                                <td>{{ movement.get_reason_display }}</td>
+                                <td class="pe-4">
+                                    {% if movement.work_order %}
+                                        <a href="{% url 'maintenance:workorder_detail' movement.work_order.pk %}" class="btn btn-sm btn-outline-info">
+                                            WO #{{ movement.work_order.pk }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-history fa-3x mb-3 d-block"></i>
+                                    No stock movements found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if is_paginated %}
+        <nav class="mt-4 mx-3">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                    </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} of {{ paginator.num_pages }}</span>
+                </li>
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

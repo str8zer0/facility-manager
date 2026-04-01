@@ -4,6 +4,10 @@ from accounts.models import User
 from facilities.models import Room
 
 
+# ─────────────────────────────────────────────
+# AssetCategory Forms
+# ─────────────────────────────────────────────
+
 class AssetCategoryForm(forms.ModelForm):
     class Meta:
         model = AssetCategory
@@ -13,6 +17,10 @@ class AssetCategoryForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
+
+# ─────────────────────────────────────────────
+# Asset Forms
+# ─────────────────────────────────────────────
 
 class AssetForm(forms.ModelForm):
     category = forms.ModelChoiceField(

@@ -1,96 +1,106 @@
 {% extends "base.html" %}
 
-{% block title %}{% if action == 'Create' %}New Work Order{% else %}Edit Work Order{% endif %} - Facility Manager{% endblock %}
+{% block title %}{{ action }} Work Order{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb">
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'common:home' %}">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_list' %}">Work Orders</a></li>
-            {% if action == 'Edit' %}
-            <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_detail' form.instance.pk %}">#{{ form.instance.pk }}</a></li>
+            {% if action == "Edit" %}
+                <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_detail' form.instance.pk %}">#{{ form.instance.id }}</a></li>
             {% endif %}
-            <li class="breadcrumb-item active">{% if action == 'Create' %}New{% else %}Edit{% endif %}</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ action }} Work Order</li>
         </ol>
     </nav>
 
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0 py-3">
-                    <h5 class="card-title mb-0">{% if action == 'Create' %}Create New Work Order{% else %}Edit Work Order #{{ form.instance.id }}{% endif %}</h5>
+                <div class="card-header bg-white border-bottom py-3">
+                    <h1 class="h4 mb-0">{{ action }} Work Order</h1>
                 </div>
-                <div class="card-body pt-0">
-                    <form method="post">
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
                         {% csrf_token %}
                         
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">Title</label>
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <!-- Basic Info -->
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">{{ form.title.label }}</label>
                                 {{ form.title }}
-                                {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors }}</div>{% endif %}
+                                {% for error in form.title.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                             </div>
-                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">Description</label>
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">{{ form.description.label }}</label>
                                 {{ form.description }}
-                                {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+                                {% for error in form.description.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                             </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Priority</label>
-                                {{ form.priority }}
-                                {% if form.priority.errors %}<div class="text-danger small">{{ form.priority.errors }}</div>{% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Status</label>
-                                {{ form.status }}
-                                {% if form.status.errors %}<div class="text-danger small">{{ form.status.errors }}</div>{% endif %}
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Assigned To</label>
-                                {{ form.assigned_to }}
-                                {% if form.assigned_to.errors %}<div class="text-danger small">{{ form.assigned_to.errors }}</div>{% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Due Date</label>
-                                {{ form.due_date }}
-                                {% if form.due_date.errors %}<div class="text-danger small">{{ form.due_date.errors }}</div>{% endif %}
-                            </div>
-                        </div>
-
-                        <hr class="my-4">
-                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Location (Select one)</h6>
-
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Building</label>
+                            
+                            <!-- Location -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.building.id_for_label }}" class="form-label fw-semibold">{{ form.building.label }}</label>
                                 {{ form.building }}
-                                {% if form.building.errors %}<div class="text-danger small">{{ form.building.errors }}</div>{% endif %}
+                                {% for error in form.building.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Room</label>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.room.id_for_label }}" class="form-label fw-semibold">{{ form.room.label }}</label>
                                 {{ form.room }}
-                                {% if form.room.errors %}<div class="text-danger small">{{ form.room.errors }}</div>{% endif %}
+                                {% for error in form.room.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Asset</label>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.asset.id_for_label }}" class="form-label fw-semibold">{{ form.asset.label }}</label>
                                 {{ form.asset }}
-                                {% if form.asset.errors %}<div class="text-danger small">{{ form.asset.errors }}</div>{% endif %}
+                                {% for error in form.asset.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+
+                            <!-- Status & Priority -->
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">{{ form.status.label }}</label>
+                                {{ form.status }}
+                                {% for error in form.status.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.priority.id_for_label }}" class="form-label fw-semibold">{{ form.priority.label }}</label>
+                                {{ form.priority }}
+                                {% for error in form.priority.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.due_date.id_for_label }}" class="form-label fw-semibold">{{ form.due_date.label }}</label>
+                                {{ form.due_date }}
+                                {% for error in form.due_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+
+                            <!-- Assignment & Active -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.assigned_to.id_for_label }}" class="form-label fw-semibold">{{ form.assigned_to.label }}</label>
+                                {{ form.assigned_to }}
+                                {% for error in form.assigned_to.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex align-items-center">
+                                <div class="form-check form-switch mt-4">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label fw-semibold" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+                                </div>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{% if action == 'Edit' %}{% url 'maintenance:workorder_detail' form.instance.pk %}{% else %}{% url 'maintenance:workorder_list' %}{% endif %}" class="btn btn-light px-4">Cancel</a>
-                            <button type="submit" class="btn btn-primary px-4">{% if action == 'Create' %}Create Work Order{% else %}Save Changes{% endif %}</button>
+                            <a href="{% if action == 'Edit' %}{% url 'maintenance:workorder_detail' form.instance.pk %}{% else %}{% url 'maintenance:workorder_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-1"></i> Save Work Order
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -98,17 +108,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Simple script to apply Bootstrap classes if not already applied by form_class or widget
-    document.querySelectorAll('input, select, textarea').forEach(el => {
-        if (!el.classList.contains('btn')) {
-            el.classList.add('form-control');
-        }
-        if (el.tagName === 'SELECT') {
-            el.classList.remove('form-control');
-            el.classList.add('form-select');
-        }
-    });
-</script>
 {% endblock %}

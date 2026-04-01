@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-light">
+<body class="bg-light d-flex flex-column min-vh-100">
 
     {% include "partials/navbar.html" %}
     
@@ -20,7 +20,7 @@
         {% include "partials/messages.html" %}
     </div>
 
-    <main>
+    <main class="flex-grow-1">
         {% block content %}{% endblock %}
     </main>
 

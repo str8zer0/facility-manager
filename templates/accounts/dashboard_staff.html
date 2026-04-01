@@ -10,9 +10,9 @@
             <p class="text-muted">Request maintenance services and track your submissions.</p>
         </div>
         <div class="col-md-4 text-center text-md-end">
-            <button class="btn btn-primary btn-lg rounded-pill shadow-sm">
+            <a href="{% url 'maintenance:workorder_create' %}" class="btn btn-primary btn-lg rounded-pill shadow-sm">
                 <i class="fas fa-plus-circle me-1"></i> New Maintenance Request
-            </button>
+            </a>
         </div>
     </div>
 
@@ -25,7 +25,7 @@
                         <i class="fas fa-paper-plane text-primary"></i>
                     </div>
                     <h6 class="text-muted mb-1">Total Submitted</h6>
-                    <h3 class="mb-0">12</h3>
+                    <h3 class="mb-0">{{ my_work_orders.count }}</h3>
                 </div>
             </div>
         </div>
@@ -35,8 +35,8 @@
                     <div class="bg-warning bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
                         <i class="fas fa-hourglass-half text-warning"></i>
                     </div>
-                    <h6 class="text-muted mb-1">In Progress</h6>
-                    <h3 class="mb-0">4</h3>
+                    <h6 class="text-muted mb-1">Active Requests</h6>
+                    <h3 class="mb-0">{{ my_open_work_orders.count }}</h3>
                 </div>
             </div>
         </div>
@@ -46,8 +46,8 @@
                     <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
                         <i class="fas fa-check-circle text-success"></i>
                     </div>
-                    <h6 class="text-muted mb-1">Completed</h6>
-                    <h3 class="mb-0">8</h3>
+                    <h6 class="text-muted mb-1">Total Assets</h6>
+                    <h3 class="mb-0">{{ total_assets|default:0 }}</h3>
                 </div>
             </div>
         </div>
@@ -71,33 +71,25 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for wo in my_work_orders %}
                         <tr>
-                            <td class="ps-4 fw-bold">#REQ-2051</td>
-                            <td>Mar 29, 2026</td>
-                            <td>Broken chair in Conference Room 2B</td>
-                            <td><span class="badge bg-secondary rounded-pill">Pending Approval</span></td>
+                            <td class="ps-4 fw-bold">#{{ wo.id }}</td>
+                            <td>{{ wo.created_at|date:"M d, Y" }}</td>
+                            <td>{{ wo.title|truncatechars:50 }}</td>
+                            <td>
+                                <span class="badge bg-{% if wo.status == 'COMPLETED' %}success{% elif wo.status == 'CANCELLED' %}danger{% elif wo.status == 'IN_PROGRESS' %}info{% else %}secondary{% endif %} rounded-pill">
+                                    {{ wo.get_status_display }}
+                                </span>
+                            </td>
                             <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-outline-primary">View</button>
+                                <a href="{% url 'maintenance:workorder_detail' wo.pk %}" class="btn btn-sm btn-outline-primary">View</a>
                             </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td class="ps-4 fw-bold">#REQ-2048</td>
-                            <td>Mar 25, 2026</td>
-                            <td>Water cooler empty in West Wing</td>
-                            <td><span class="badge bg-info rounded-pill">In Progress</span></td>
-                            <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-outline-primary">View</button>
-                            </td>
+                            <td colspan="5" class="text-center text-muted py-4">You haven't submitted any requests yet.</td>
                         </tr>
-                        <tr>
-                            <td class="ps-4 fw-bold">#REQ-2040</td>
-                            <td>Mar 20, 2026</td>
-                            <td>Software update on Desktop #45</td>
-                            <td><span class="badge bg-success rounded-pill">Resolved</span></td>
-                            <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-outline-primary">View</button>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>

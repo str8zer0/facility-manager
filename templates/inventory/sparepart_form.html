@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Spare Part{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Spare Parts</a></li>
+            {% if action == "Edit" %}
+                <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_detail' form.instance.pk %}">{{ form.instance.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ action }} Spare Part</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h1 class="h4 mb-0">{{ action }} Spare Part</h1>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">{{ form.name.label }}</label>
+                                {{ form.name }}
+                                {% for error in form.name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.part_number.id_for_label }}" class="form-label fw-semibold">{{ form.part_number.label }}</label>
+                                {{ form.part_number }}
+                                {% for error in form.part_number.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.supplier.id_for_label }}" class="form-label fw-semibold">{{ form.supplier.label }}</label>
+                            {{ form.supplier }}
+                            {% for error in form.supplier.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label fw-semibold">{{ form.quantity.label }}</label>
+                                {{ form.quantity }}
+                                {% for error in form.quantity.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.minimum_quantity.id_for_label }}" class="form-label fw-semibold">{{ form.minimum_quantity.label }}</label>
+                                {{ form.minimum_quantity }}
+                                {% for error in form.minimum_quantity.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% if action == 'Edit' %}{% url 'inventory:sparepart_detail' form.instance.pk %}{% else %}{% url 'inventory:sparepart_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-1"></i> Save Part
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

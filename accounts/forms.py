@@ -8,6 +8,10 @@ from accounts.models import Profile
 User = get_user_model()
 
 
+# ─────────────────────────────────────────────
+# User Forms
+# ─────────────────────────────────────────────
+
 class UserRoleForm(UserChangeForm):
     role = forms.ChoiceField(required=False)
 
@@ -121,7 +125,70 @@ class RegisterForm(forms.ModelForm):
         return user
 
 
+# ─────────────────────────────────────────────
+# Profile Forms
+# ─────────────────────────────────────────────
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["first_name", "last_name", "department", "job", "phone", "profile_picture"]
+        widgets = {
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
+            "department": forms.Select(attrs={"class": "form-select"}),
+            "job": forms.Select(attrs={"class": "form-select"}),
+            "phone": forms.TextInput(attrs={"class": "form-control"}),
+            "profile_picture": forms.ClearableFileInput(attrs={"class": "form-control"}),
+        }
+
+
+class AdminProfileForm(forms.ModelForm):
+    """
+    Used by Admin to edit another user's profile.
+    Identical fields to ProfileForm but scoped separately
+    so future admin-only fields can be added without
+    affecting the user-facing form.
+    """
+    class Meta:
+        model = Profile
+        fields = ["first_name", "last_name", "department", "job", "phone", "profile_picture"]
+        widgets = {
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
+            "department": forms.Select(attrs={"class": "form-select"}),
+            "job": forms.Select(attrs={"class": "form-select"}),
+            "phone": forms.TextInput(attrs={"class": "form-control"}),
+            "profile_picture": forms.ClearableFileInput(attrs={"class": "form-control"}),
+        }
+
+
+# ─────────────────────────────────────────────
+# Department Forms
+# ─────────────────────────────────────────────
+
+class DepartmentForm(forms.ModelForm):
+    class Meta:
+        from accounts.models import Department
+        model = Department
+        fields = ["name", "description"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Department name"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        }
+
+
+# ─────────────────────────────────────────────
+# Job Forms
+# ─────────────────────────────────────────────
+
+class JobForm(forms.ModelForm):
+    class Meta:
+        from accounts.models import Job
+        model = Job
+        fields = ["title", "description", "department"]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Job title"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "department": forms.Select(attrs={"class": "form-select"}),
+        }

@@ -1,24 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}Delete Work Order - Facility Manager{% endblock %}
+{% block title %}Delete Work Order{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card border-0 shadow">
-                <div class="card-body p-5 text-center">
-                    <div class="mb-4">
-                        <i class="fas fa-exclamation-triangle text-danger fa-4x"></i>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <div class="text-danger mb-4">
+                        <i class="fas fa-exclamation-triangle fa-4x"></i>
                     </div>
-                    <h3 class="mb-3">Delete Work Order?</h3>
-                    <p class="text-muted mb-4">Are you sure you want to delete work order <strong>"{{ object.title }}"</strong>? This action cannot be undone and all associated comments and attachments will be removed.</p>
-                    
+                    <h2 class="h4 mb-3">Confirm Deletion</h2>
+                    <p class="text-muted mb-4">
+                        Are you sure you want to delete the work order: <strong>"{{ work_order.title }}"</strong>? 
+                        This action cannot be undone.
+                    </p>
                     <form method="post">
                         {% csrf_token %}
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger py-2">Confirm Delete</button>
-                            <a href="{% url 'maintenance:workorder_detail' object.pk %}" class="btn btn-light py-2">Cancel</a>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'maintenance:workorder_detail' work_order.pk %}" class="btn btn-outline-secondary px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger px-4">
+                                <i class="fas fa-trash me-1"></i> Delete Work Order
+                            </button>
                         </div>
                     </form>
                 </div>

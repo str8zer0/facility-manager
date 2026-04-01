@@ -1,3 +1,6 @@
+{% load menu_tags %}
+{% global_menu request.user as menus %}
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="{% url 'common:home' %}">
@@ -15,49 +18,24 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'accounts:dashboard' %}">Dashboard</a>
                     </li>
+                    {% for menu in menus %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="facilitiesDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-building me-1"></i> Facilities
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="{{ menu.icon }} me-2 opacity-50"></i>
+                            {{ menu.label }}
                         </a>
-                        <ul class="dropdown-menu shadow border-0">
-                            <li><a class="dropdown-item py-2" href="{% url 'facilities:building_list' %}"><i class="fas fa-city me-2 opacity-50"></i> Buildings</a></li>
-                            <li><a class="dropdown-item py-2" href="{% url 'facilities:room_list' %}"><i class="fas fa-door-open me-2 opacity-50"></i> Rooms</a></li>
+                        <ul class="dropdown-menu">
+                            {% for item in menu.items %}
+                                <li>
+                                    <a class="dropdown-item py-2" href="{% url item.url %}">
+                                        <i class="{{ item.icon }} me-2 opacity-50"></i>
+                                        {{ item.label }}
+                                    </a>
+                                </li>
+                            {% endfor %}
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="assetsDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-boxes me-1"></i> Assets
-                        </a>
-                        <ul class="dropdown-menu shadow border-0">
-                            <li><a class="dropdown-item py-2" href="{% url 'assets:asset_list' %}"><i class="fas fa-list me-2 opacity-50"></i> All Assets</a></li>
-                            <li><a class="dropdown-item py-2" href="{% url 'assets:category_list' %}"><i class="fas fa-tags me-2 opacity-50"></i> Categories</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="maintenanceDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-wrench me-1"></i> Maintenance
-                        </a>
-                        <ul class="dropdown-menu shadow border-0">
-                            <li><a class="dropdown-item py-2" href="{% url 'maintenance:workorder_list' %}"><i class="fas fa-clipboard-list me-2 opacity-50"></i> Work Orders</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item py-2" href="{% url 'maintenance:inspection_list' %}"><i class="fas fa-clipboard-check me-2 opacity-50"></i> Inspections</a></li>
-                            <li><a class="dropdown-item py-2" href="{% url 'maintenance:inspectiontemplate_list' %}"><i class="fas fa-tasks me-2 opacity-50"></i> Templates</a></li>
-                        </ul>
-                    </li>
-                    <!-- Role-based menu items (Placeholders) -->
-                    {% comment %}
-                        {% if user_is_admin %}
-                            <li class="nav-item"><a class="nav-link" href="#">System Logs</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#">User Management</a></li>
-                        {% elif user_is_manager %}
-                            <li class="nav-item"><a class="nav-link" href="#">Inventory</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#">Reports</a></li>
-                        {% elif user_is_technician %}
-                            <li class="nav-item"><a class="nav-link" href="#">My Tasks</a></li>
-                        {% elif user_is_staff %}
-                            <li class="nav-item"><a class="nav-link" href="#">New Request</a></li>
-                        {% endif %}
-                    {% endcomment %}
+                    {% endfor %}
                 {% endif %}
             </ul>
             <ul class="navbar-nav">

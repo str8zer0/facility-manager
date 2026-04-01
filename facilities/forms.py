@@ -3,6 +3,10 @@ from accounts.models import User
 from facilities.models import Building, Room
 
 
+# ─────────────────────────────────────────────
+# Building Forms
+# ─────────────────────────────────────────────
+
 class BuildingForm(forms.ModelForm):
     manager = forms.ModelChoiceField(
         queryset=User.objects.filter(is_active=True, groups__name="Manager").order_by("email"),
@@ -20,6 +24,10 @@ class BuildingForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
+
+# ─────────────────────────────────────────────
+# Room Forms
+# ─────────────────────────────────────────────
 
 class RoomForm(forms.ModelForm):
     class Meta:

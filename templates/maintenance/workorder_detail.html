@@ -1,206 +1,212 @@
 {% extends "base.html" %}
 
-{% block title %}{{ work_order.title }} - Work Order Details{% endblock %}
+{% block title %}Work Order: {{ workorder.title }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'common:home' %}">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_list' %}">Work Orders</a></li>
-            <li class="breadcrumb-item active">#{{ work_order.id }}</li>
-        </ol>
-    </nav>
-
-    <div class="d-flex justify-content-between align-items-start mb-4">
-        <div>
-            <h1 class="h3 mb-1 text-gray-800">{{ work_order.title }}</h1>
-            <p class="text-muted mb-0">Created by {{ work_order.created_by.get_full_name|default:work_order.created_by.email }} on {{ work_order.created_at|date:"F j, Y, g:i a" }}</p>
-        </div>
-        <div class="d-flex gap-2">
-            {% if user.role == 'ADMIN' or user.role == 'MANAGER' or user == work_order.assigned_to %}
-            <a href="{% url 'maintenance:workorder_update' work_order.pk %}" class="btn btn-outline-secondary">
+<div class="container py-4">
+    <!-- Breadcrumb and Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_list' %}">Work Orders</a></li>
+                <li class="breadcrumb-item active" aria-current="page">#{{ work_order.id }}</li>
+            </ol>
+        </nav>
+        <div class="mt-2 mt-md-0">
+            <a href="{% url 'maintenance:workorder_update' work_order.pk %}" class="btn btn-outline-secondary me-2">
                 <i class="fas fa-edit me-1"></i> Edit
             </a>
-            {% endif %}
             {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
-            <a href="{% url 'maintenance:workorder_delete' work_order.pk %}" class="btn btn-outline-danger">
-                <i class="fas fa-trash me-1"></i> Delete
-            </a>
+                <a href="{% url 'maintenance:workorder_delete' work_order.pk %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i> Delete
+                </a>
             {% endif %}
         </div>
     </div>
 
     <div class="row">
-        <!-- Main Content -->
+        <!-- Main Details -->
         <div class="col-lg-8">
-            <!-- Details Card -->
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-transparent border-0 py-3">
-                    <h5 class="card-title mb-0">Description</h5>
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0">Work Order Details</h2>
+                        <div>
+                            {% if work_order.status == 'COMPLETED' %}
+                                <span class="badge bg-success">Completed</span>
+                            {% elif work_order.status == 'IN_PROGRESS' %}
+                                <span class="badge bg-primary">In Progress</span>
+                            {% elif work_order.status == 'OPEN' %}
+                                <span class="badge bg-secondary">Open</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">{{ work_order.get_status_display }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body pt-0">
-                    <p class="card-text">{{ work_order.description|linebreaks }}</p>
+                <div class="card-body">
+                    <h1 class="h3 mb-3">{{ work_order.title }}</h1>
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Location</label>
+                            <span class="h6">{{ work_order.location }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Priority</label>
+                            {% if work_order.priority == '4' %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% elif work_order.priority == '3' %}
+                                <span class="badge bg-warning text-dark">High</span>
+                            {% elif work_order.priority == '2' %}
+                                <span class="badge bg-info text-dark">Medium</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark border">Low</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Assigned To</label>
+                            <span class="h6">{{ work_order.assigned_to.get_full_name|default:work_order.assigned_to.email|default:"Unassigned" }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Due Date</label>
+                            <span class="h6 {% if work_order.due_date < today and work_order.status != 'COMPLETED' %}text-danger{% endif %}">
+                                {{ work_order.due_date|default:"No due date" }}
+                            </span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Created By</label>
+                            <span class="small">{{ work_order.created_by.get_full_name|default:work_order.created_by.email }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Created At</label>
+                            <span class="small">{{ work_order.created_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                    </div>
+
+                    {% if work_order.description %}
+                        <div class="mt-4">
+                            <label class="small text-muted text-uppercase fw-bold d-block">Description</label>
+                            <div class="p-3 bg-light rounded mt-1">
+                                {{ work_order.description|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Comments Section -->
+            <!-- Spare Parts Used (Integration with Inventory) -->
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Comments & Activity</h5>
-                    <span class="badge bg-light text-dark">{{ comments.count }}</span>
+                <div class="card-header bg-white border-bottom py-3">
+                    <h2 class="h5 mb-0">Spare Parts Used</h2>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Part</th>
+                                    <th>Quantity</th>
+                                    <th class="text-end pe-4">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movement in work_order.movements_for_work_order.all %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <a href="{% url 'inventory:sparepart_detail' movement.part.pk %}" class="text-decoration-none">
+                                                {{ movement.part.name }}
+                                            </a>
+                                        </td>
+                                        <td>{{ movement.change|stringformat:"+d"|slice:"1:" }}</td>
+                                        <td class="text-end pe-4 small text-muted">{{ movement.timestamp|date:"M d, Y" }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4 text-muted small">No spare parts logged for this work order.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top py-3">
+                    <a href="{% url 'inventory:movement_list' %}?work_order={{ work_order.pk }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i> Log Part Usage
+                    </a>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h2 class="h5 mb-0">Comments</h2>
                 </div>
                 <div class="card-body">
-                    <div class="timeline mb-4">
+                    <div class="mb-4">
                         {% for comment in comments %}
-                        <div class="d-flex mb-3">
-                            <div class="flex-shrink-0">
-                                <div class="avatar-sm rounded-circle bg-light text-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                    {{ comment.user.email|slice:":1"|upper }}
+                            <div class="d-flex mb-3">
+                                <div class="flex-shrink-0">
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        {{ comment.user.email|first|upper }}
+                                    </div>
+                                </div>
+                                <div class="ms-3 p-3 bg-light rounded w-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold small">{{ comment.user.get_full_name|default:comment.user.email }}</span>
+                                        <small class="text-muted">{{ comment.timestamp|date:"M d, Y H:i" }}</small>
+                                    </div>
+                                    <div class="small">{{ comment.comment|linebreaksbr }}</div>
                                 </div>
                             </div>
-                            <div class="flex-grow-1 ms-3 border-bottom pb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h6 class="mb-0 small fw-bold">{{ comment.user.get_full_name|default:comment.user.email }}</h6>
-                                    <small class="text-muted">{{ comment.timestamp|timesince }} ago</small>
-                                </div>
-                                <p class="mb-0 small text-secondary">{{ comment.comment }}</p>
-                            </div>
-                        </div>
                         {% empty %}
-                        <p class="text-center text-muted small py-3">No comments yet.</p>
+                            <p class="text-center text-muted py-3 small">No comments yet.</p>
                         {% endfor %}
                     </div>
 
-                    <form action="{% url 'maintenance:workorder_comment_create' work_order.pk %}" method="post">
+                    <hr>
+
+                    <form action="{% url 'maintenance:workorder_comment_add' work_order.pk %}" method="post">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <textarea name="comment" class="form-control" rows="2" placeholder="Add a comment..." required></textarea>
+                            <label for="id_comment" class="form-label small fw-bold text-uppercase text-muted">Add Comment</label>
+                            <textarea name="comment" id="id_comment" class="form-control" rows="3" required placeholder="Type your comment here..."></textarea>
                         </div>
                         <div class="text-end">
-                            <button type="submit" class="btn btn-sm btn-primary px-4">Post Comment</button>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-paper-plane me-1"></i> Post Comment
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar -->
+        <!-- Sidebar: History -->
         <div class="col-lg-4">
-            <!-- Status & Info Card -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <div class="mb-4">
-                        <label class="small text-muted text-uppercase fw-bold mb-2 d-block">Status</label>
-                        {% if work_order.status == 'COMPLETED' %}
-                            <span class="badge bg-success w-100 py-2 fs-6">Completed</span>
-                        {% elif work_order.status == 'IN_PROGRESS' %}
-                            <span class="badge bg-primary w-100 py-2 fs-6">In Progress</span>
-                        {% elif work_order.status == 'CANCELLED' %}
-                            <span class="badge bg-dark w-100 py-2 fs-6">Cancelled</span>
-                        {% else %}
-                            <span class="badge bg-secondary w-100 py-2 fs-6">Pending</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="small text-muted text-uppercase fw-bold mb-2 d-block">Priority</label>
-                        {% if work_order.priority == 'EMERGENCY' %}
-                            <span class="badge bg-danger w-100 py-2 fs-6">Emergency</span>
-                        {% elif work_order.priority == 'HIGH' %}
-                            <span class="badge bg-warning text-dark w-100 py-2 fs-6">High</span>
-                        {% elif work_order.priority == 'MEDIUM' %}
-                            <span class="badge bg-info text-dark w-100 py-2 fs-6">Medium</span>
-                        {% else %}
-                            <span class="badge bg-secondary w-100 py-2 fs-6">Low</span>
-                        {% endif %}
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="mb-3">
-                        <label class="small text-muted text-uppercase fw-bold mb-1 d-block">Assigned To</label>
-                        {% if work_order.assigned_to %}
-                            <p class="mb-0 fw-bold">{{ work_order.assigned_to.get_full_name|default:work_order.assigned_to.email }}</p>
-                        {% else %}
-                            <p class="mb-0 text-muted">Unassigned</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="small text-muted text-uppercase fw-bold mb-1 d-block">Location</label>
-                        {% if work_order.asset %}
-                            <p class="mb-0"><i class="fas fa-cube me-1 text-muted"></i> {{ work_order.asset.name }}</p>
-                            <p class="small text-muted mb-0">{{ work_order.asset.room.name }}, {{ work_order.asset.room.building.name }}</p>
-                        {% elif work_order.room %}
-                            <p class="mb-0"><i class="fas fa-door-open me-1 text-muted"></i> {{ work_order.room.name }}</p>
-                            <p class="small text-muted mb-0">{{ work_order.room.building.name }}</p>
-                        {% elif work_order.building %}
-                            <p class="mb-0"><i class="fas fa-building me-1 text-muted"></i> {{ work_order.building.name }}</p>
-                        {% else %}
-                            <p class="mb-0 text-muted">No location specified</p>
-                        {% endif %}
-                    </div>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h2 class="h5 mb-0"><i class="fas fa-history me-2 text-muted"></i>Activity Log</h2>
                 </div>
-            </div>
-
-            <!-- Attachments Card -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Attachments</h5>
-                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                        <i class="fas fa-upload"></i>
-                    </button>
-                </div>
-                <div class="card-body pt-0">
-                    <div class="list-group list-group-flush">
-                        {% for attachment in attachments %}
-                        <div class="list-group-item px-0 border-0 mb-2">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                    <div class="avatar-sm bg-light text-secondary rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-file"></i>
-                                    </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for log in work_order.history_set.all %}
+                            <li class="list-group-item border-0 py-3">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 fw-bold">{{ log.action }}</h6>
+                                    <small class="text-muted">{{ log.timestamp|date:"M d, Y" }}</small>
                                 </div>
-                                <div class="flex-grow-1 ms-3 overflow-hidden">
-                                    <h6 class="mb-0 small text-truncate">
-                                        <a href="{{ attachment.file.url }}" target="_blank" class="text-decoration-none text-dark">{{ attachment.file.name|slice:"19:" }}</a>
-                                    </h6>
-                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Uploaded by {{ attachment.uploaded_by.email|slice:":10" }}...</small>
-                                </div>
-                            </div>
-                        </div>
+                                <p class="mb-1 small text-muted">{{ log.notes }}</p>
+                                <small class="text-muted">By: {{ log.user.get_full_name|default:log.user.email }}</small>
+                            </li>
                         {% empty %}
-                        <p class="text-center text-muted small py-3 mb-0">No attachments.</p>
+                            <li class="list-group-item text-center py-5 text-muted small">
+                                No history logs yet.
+                            </li>
                         {% endfor %}
-                    </div>
+                    </ul>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Upload Modal -->
-<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0">
-                <h5 class="modal-title">Upload Attachment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{% url 'maintenance:workorder_attachment_create' work_order.pk %}" method="post" enctype="multipart/form-data">
-                <div class="modal-body pt-0">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Select File</label>
-                        <input type="file" name="file" class="form-control" required>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Upload</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
