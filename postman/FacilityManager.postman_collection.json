@@ -1,0 +1,304 @@
+{
+  "info": {
+    "name": "Facility Manager API",
+    "description": "API collection for the Facility Manager Django project. Covers JWT authentication, Assets, and Work Orders including comments.\n\n## Setup\n1. Import this collection into Postman\n2. Set the `base_url` variable to `http://localhost:8000` for local testing\n3. Use the **Obtain Token** request to login — the access and refresh tokens are automatically saved to collection variables\n4. All subsequent requests use the `access_token` variable automatically via the collection Authorization header",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Obtain Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.access) {",
+                  "    pm.collectionVariables.set('access_token', json.access);",
+                  "}",
+                  "if (json.refresh) {",
+                  "    pm.collectionVariables.set('refresh_token', json.refresh);",
+                  "}",
+                  "pm.test('Status is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has access token', function() {",
+                  "    pm.expect(json).to.have.property('access');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"yourpassword\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/token/"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.access) {",
+                  "    pm.collectionVariables.set('access_token', json.access);",
+                  "}",
+                  "pm.test('Status is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/token/refresh/"
+          }
+        },
+        {
+          "name": "Verify Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{access_token}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/token/verify/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Assets",
+      "item": [
+        {
+          "name": "List Assets",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/assets/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "assets", ""],
+              "query": [
+                { "key": "status", "value": "101", "disabled": true, "description": "Filter by status code e.g. 101=Operational" },
+                { "key": "is_active", "value": "true", "disabled": true },
+                { "key": "search", "value": "", "disabled": true, "description": "Search by name, serial number, manufacturer" },
+                { "key": "ordering", "value": "name", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retrieve Asset",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/assets/1/"
+          }
+        },
+        {
+          "name": "Create Asset",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Air Handling Unit 01\",\n  \"category_id\": 1,\n  \"status\": \"101\",\n  \"tag\": \"VENTILATION\",\n  \"serial_number\": \"AHU-2024-001\",\n  \"manufacturer\": \"Daikin\",\n  \"model_number\": \"AHU-4500\",\n  \"is_active\": true,\n  \"notes\": \"Installed on rooftop level 3\"\n}"
+            },
+            "url": "{{base_url}}/api/assets/"
+          }
+        },
+        {
+          "name": "Update Asset",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Air Handling Unit 01\",\n  \"category_id\": 1,\n  \"status\": \"501\",\n  \"tag\": \"VENTILATION\",\n  \"serial_number\": \"AHU-2024-001\",\n  \"manufacturer\": \"Daikin\",\n  \"model_number\": \"AHU-4500\",\n  \"is_active\": true,\n  \"notes\": \"Sent for scheduled maintenance\"\n}"
+            },
+            "url": "{{base_url}}/api/assets/1/"
+          }
+        },
+        {
+          "name": "Partial Update Asset",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"301\"\n}"
+            },
+            "url": "{{base_url}}/api/assets/1/"
+          }
+        },
+        {
+          "name": "Delete Asset",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/assets/1/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Work Orders",
+      "item": [
+        {
+          "name": "List Work Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/work-orders/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "work-orders", ""],
+              "query": [
+                { "key": "status", "value": "OPEN", "disabled": true, "description": "OPEN | IN_PROGRESS | ON_HOLD | AWAITING_PARTS | COMPLETED | CANCELLED" },
+                { "key": "priority", "value": "4", "disabled": true, "description": "1=Low 2=Medium 3=High 4=Critical" },
+                { "key": "is_active", "value": "true", "disabled": true },
+                { "key": "search", "value": "", "disabled": true, "description": "Search by title or description" },
+                { "key": "ordering", "value": "-created_at", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retrieve Work Order",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/work-orders/1/"
+          }
+        },
+        {
+          "name": "Create Work Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Fix broken HVAC unit\",\n  \"description\": \"The HVAC unit on floor 3 is not cooling properly.\",\n  \"asset_id\": 1,\n  \"status\": \"OPEN\",\n  \"priority\": \"3\",\n  \"due_date\": \"2026-04-10\",\n  \"is_active\": true\n}"
+            },
+            "url": "{{base_url}}/api/work-orders/"
+          }
+        },
+        {
+          "name": "Update Work Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Fix broken HVAC unit\",\n  \"description\": \"Technician assigned and on site.\",\n  \"asset_id\": 1,\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"3\",\n  \"due_date\": \"2026-04-10\",\n  \"is_active\": true\n}"
+            },
+            "url": "{{base_url}}/api/work-orders/1/"
+          }
+        },
+        {
+          "name": "Partial Update Work Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+            },
+            "url": "{{base_url}}/api/work-orders/1/"
+          }
+        },
+        {
+          "name": "Delete Work Order",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/work-orders/1/"
+          }
+        },
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/work-orders/1/comments/"
+          }
+        },
+        {
+          "name": "Add Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Replacement part ordered, ETA 2 days.\"\n}"
+            },
+            "url": "{{base_url}}/api/work-orders/1/comments/"
+          }
+        }
+      ]
+    }
+  ]
+}
