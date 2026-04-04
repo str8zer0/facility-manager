@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python313", "uv"]
+nixPkgs = ["python313", "uv", "postgresql"]
 
 [phases.install]
 cmds = [
