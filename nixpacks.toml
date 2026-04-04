@@ -10,6 +10,3 @@ cmds = [
 cmds = [
     "python manage.py collectstatic --noinput"
 ]
-
-[start]
-cmd = "bash start.sh"
