@@ -44,7 +44,11 @@ DATABASES["default"]["CONN_MAX_AGE"] = 600
 # ─────────────────────────────────────────────
 
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    }
+}
 
 # ─────────────────────────────────────────────
 # Media Files — Cloudflare R2
@@ -58,26 +62,20 @@ CLOUDFLARE_R2_ACCESS_KEY = env("CLOUDFLARE_R2_ACCESS_KEY")
 CLOUDFLARE_R2_SECRET_KEY = env("CLOUDFLARE_R2_SECRET_KEY")
 CLOUDFLARE_R2_PUBLIC_URL = env("CLOUDFLARE_R2_PUBLIC_URL")  # e.g. https://pub-xxx.r2.dev
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
+R2_STORAGE_OPTIONS = {
+    "bucket_name": CLOUDFLARE_R2_BUCKET_NAME,
+    "access_key": CLOUDFLARE_R2_ACCESS_KEY,
+    "secret_key": CLOUDFLARE_R2_SECRET_KEY,
+    "endpoint_url": f"https://{CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+    "region_name": "auto",
+    "signature_version": "s3v4",
+    "default_acl": None,
 }
 
-AWS_STORAGE_BUCKET_NAME = CLOUDFLARE_R2_BUCKET_NAME
-AWS_ACCESS_KEY_ID = CLOUDFLARE_R2_ACCESS_KEY
-AWS_SECRET_ACCESS_KEY = CLOUDFLARE_R2_SECRET_KEY
-AWS_S3_ENDPOINT_URL = f"https://{CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-AWS_S3_REGION_NAME = "auto"
-AWS_S3_SIGNATURE_VERSION = "s3v4"
-AWS_DEFAULT_ACL = None  # R2 does not use ACLs
-AWS_S3_FILE_OVERWRITE = False  # Never silently overwrite uploaded files
-AWS_QUERYSTRING_AUTH = False  # Use public URLs (requires a public bucket or custom domain)
+STORAGES["default"] = {
+    "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    "OPTIONS": R2_STORAGE_OPTIONS
+}
 
 MEDIA_URL = f"{CLOUDFLARE_R2_PUBLIC_URL}/"
 
