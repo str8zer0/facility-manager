@@ -44,7 +44,6 @@ DATABASES["default"]["CONN_MAX_AGE"] = 600
 # ─────────────────────────────────────────────
 
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # ─────────────────────────────────────────────
@@ -60,6 +59,15 @@ CLOUDFLARE_R2_SECRET_KEY = env("CLOUDFLARE_R2_SECRET_KEY")
 CLOUDFLARE_R2_PUBLIC_URL = env("CLOUDFLARE_R2_PUBLIC_URL")  # e.g. https://pub-xxx.r2.dev
 
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 AWS_STORAGE_BUCKET_NAME = CLOUDFLARE_R2_BUCKET_NAME
 AWS_ACCESS_KEY_ID = CLOUDFLARE_R2_ACCESS_KEY
