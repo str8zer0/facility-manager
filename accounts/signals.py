@@ -45,17 +45,11 @@ def assign_group_permissions():
                 "view_workorder",
                 "change_workorder",
                 "add_workordercomment",
-                "add_workorderattachment",
                 "view_workordercomment",
-                "view_workorderattachment",
 
                 # Inspections
                 "view_inspection",
                 "change_inspection",
-                "add_inspectionresult",
-                "change_inspectionresult",
-                "view_inspectionresult",
-                "view_inspectionitem",
 
                 # Assets
                 "view_asset",

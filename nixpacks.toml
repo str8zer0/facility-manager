@@ -12,4 +12,4 @@ cmds = [
 ]
 
 [start]
-cmd = "python manage.py migrate --noinput && gunicorn facility_manager.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120"
+cmd = "python manage.py migrate --noinput && python manage.py create_default_admin && gunicorn facility_manager.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120"
