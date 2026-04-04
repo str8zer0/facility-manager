@@ -34,6 +34,9 @@ if RAILWAY_PUBLIC_DOMAIN:
 # Database
 # ─────────────────────────────────────────────
 
+DATABASES = {
+    "default": env.db("DATABASE_URL")
+}
 DATABASES["default"]["CONN_MAX_AGE"] = 600
 
 # ─────────────────────────────────────────────
