@@ -1,9 +1,8 @@
 [phases.setup]
-nixPkgs = ["python313"]
+nixPkgs = ["python313", "uv"]
 
 [phases.install]
 cmds = [
-    "pip install uv",
     "uv sync --no-dev"
 ]
 
