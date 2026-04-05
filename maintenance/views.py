@@ -76,11 +76,21 @@ class WorkOrderCreateView(LoginRequiredMixin, CreateView):
     form_class = WorkOrderForm
     template_name = "maintenance/workorder_form.html"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def get_success_url(self):
         return reverse_lazy("maintenance:workorder_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
+
+        # Auto-assign technicians to their own work orders
+        if self.request.user.groups.filter(name="Technician").exists():
+            form.instance.assigned_to = self.request.user
+
         response = super().form_valid(form)
         self.object.log(
             user=self.request.user,
@@ -88,6 +98,12 @@ class WorkOrderCreateView(LoginRequiredMixin, CreateView):
             notes=f'Work order "{self.object.title}" created.',
         )
         messages.success(self.request, f'Work order "{self.object.title}" created successfully.')
+
+        # Notify assigned technician asynchronously
+        if self.object.assigned_to:
+            from maintenance.tasks import notify_technician_assigned
+            notify_technician_assigned.delay(self.object.pk)
+
         return response
 
     def get_context_data(self, **kwargs):
@@ -101,11 +117,17 @@ class WorkOrderUpdateView(LoginRequiredMixin, UpdateView):
     form_class = WorkOrderForm
     template_name = "maintenance/workorder_form.html"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def get_success_url(self):
         return reverse_lazy("maintenance:workorder_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
         changed = form.changed_data
+        old_status = form.initial.get("status")
         response = super().form_valid(form)
         self.object.log(
             user=self.request.user,
@@ -113,6 +135,22 @@ class WorkOrderUpdateView(LoginRequiredMixin, UpdateView):
             notes=f'Fields changed: {", ".join(changed)}.' if changed else "No fields changed.",
         )
         messages.success(self.request, f'Work order "{self.object.title}" updated successfully.')
+
+        # Notify assigned technician if assignment changed
+        if "assigned_to" in changed and self.object.assigned_to:
+            from maintenance.tasks import notify_technician_assigned
+            notify_technician_assigned.delay(self.object.pk)
+
+        # Notify on status change
+        if "status" in changed:
+            from maintenance.tasks import notify_work_order_status_changed
+            new_status = self.object.get_status_display()
+            from maintenance.choices import WorkOrderStatus
+            old_status_display = dict(WorkOrderStatus.choices).get(old_status, old_status)
+            notify_work_order_status_changed.delay(
+                self.object.pk, old_status_display, new_status
+            )
+
         return response
 
     def get_context_data(self, **kwargs):

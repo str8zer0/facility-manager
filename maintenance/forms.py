@@ -52,6 +52,27 @@ class WorkOrderForm(forms.ModelForm):
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._user = user
+
+        if user:
+            # Technicians — lock assignment to themselves
+            if user.groups.filter(name="Technician").exists():
+                self.fields["assigned_to"].widget.attrs["disabled"] = True
+                self.fields["assigned_to"].required = False
+
+            # Staff — hide assignment entirely, they can't assign work orders
+            elif not user.groups.filter(name__in=["Manager", "Admin"]).exists():
+                self.fields["assigned_to"].widget = forms.HiddenInput()
+                self.fields["assigned_to"].required = False
+
+    def clean_assigned_to(self):
+        # Restore locked value for technicians
+        if self._user and self._user.groups.filter(name="Technician").exists():
+            return self.instance.assigned_to if self.instance.pk else self._user
+        return self.cleaned_data.get("assigned_to")
+
     def clean(self):
         cleaned_data = super().clean()
         if not any([cleaned_data.get("building"), cleaned_data.get("room"), cleaned_data.get("asset")]):
