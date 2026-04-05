@@ -39,6 +39,8 @@ urlpatterns = [
     path("login/", views.UserLoginView.as_view(), name="login"),
     path("logout/", views.UserLogoutView.as_view(), name="logout"),
     path("register/", views.RegisterView.as_view(), name="register"),
+    path("verify-email/<str:token>/", views.VerifyEmailView.as_view(), name="verify_email"),
+    path("resend-verification/", views.ResendVerificationView.as_view(), name="resend_verification"),
     path("profile/", views.ProfileView.as_view(), name="profile"),
     path("profile/edit/", views.ProfileUpdateView.as_view(), name="profile_edit"),
     path("dashboard/", include(dashboard_patterns)),

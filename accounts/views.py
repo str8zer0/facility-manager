@@ -20,6 +20,20 @@ class UserLoginView(LoginView):
     def get_success_url(self):
         return reverse_lazy("accounts:dashboard")
 
+    def form_valid(self, form):
+        from django.contrib import messages
+        user = form.get_user()
+        if not user.email_verified:
+            messages.error(
+                self.request,
+                "Please verify your email before logging in. "
+                '<a href="{}">Resend verification email</a>.'.format(
+                    reverse_lazy("accounts:resend_verification")
+                )
+            )
+            return self.form_invalid(form)
+        return super().form_valid(form)
+
 
 class UserLogoutView(LogoutView):
     next_page = reverse_lazy("accounts:login")
@@ -29,6 +43,67 @@ class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = "accounts/register.html"
     success_url = reverse_lazy("accounts:login")
+
+    def form_valid(self, form):
+        from django.contrib import messages
+        response = super().form_valid(form)
+
+        # Send verification email asynchronously
+        from accounts.tasks import send_verification_email
+        send_verification_email.delay(self.object.pk)
+        messages.info(
+            self.request,
+            "Registration successful. Please check your email to verify your account before logging in."
+        )
+
+        return response
+
+
+class VerifyEmailView(TemplateView):
+    template_name = "accounts/verify_email.html"
+
+    def get(self, request, *args, **kwargs):
+        from django.core.signing import TimestampSigner, SignatureExpired, BadSignature
+        from django.contrib import messages
+
+        token = kwargs.get("token")
+        signer = TimestampSigner()
+
+        try:
+            # max_age=86400 → 24 hours
+            user_pk = signer.unsign(token, max_age=86400)
+            from accounts.models import User
+            user = User.objects.get(pk=user_pk)
+
+            if not user.email_verified:
+                user.email_verified = True
+                user.save(update_fields=["email_verified"])
+                messages.success(request, "Email verified successfully. You can now log in.")
+            else:
+                messages.info(request, "Your email is already verified.")
+
+        except SignatureExpired:
+            messages.error(request, "Verification link has expired. Please request a new one.")
+        except (BadSignature, Exception):
+            messages.error(request, "Invalid verification link.")
+
+        return redirect(reverse_lazy("accounts:login"))
+
+
+class ResendVerificationView(LoginRequiredMixin, TemplateView):
+    template_name = "accounts/resend_verification.html"
+
+    def post(self, request, *args, **kwargs):
+        from django.contrib import messages
+        from accounts.tasks import send_verification_email
+
+        if request.user.email_verified:
+            messages.info(request, "Your email is already verified.")
+        else:
+            send_verification_email.delay(request.user.pk)
+            messages.success(request, "Verification email sent. Please check your inbox.")
+
+        return redirect(reverse_lazy("accounts:profile"))
 
 
 # ─────────────────────────────────────────────
