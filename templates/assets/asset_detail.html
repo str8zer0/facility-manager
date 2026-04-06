@@ -45,8 +45,12 @@
                             <span class="h5">{{ asset.name }}</span>
                         </div>
                         <div class="col-sm-6">
-                            <label class="small text-muted text-uppercase fw-bold d-block">Category</label>
-                            <span class="h6">{{ asset.category.name|default:"Uncategorized" }}</span>
+                            <label class="small text-muted text-uppercase fw-bold d-block">Categories</label>
+                            {% for cat in asset.categories.all %}
+                                <span class="badge bg-light text-dark border">{{ cat.name }}</span>
+                            {% empty %}
+                                <span class="text-muted small italic">Uncategorized</span>
+                            {% endfor %}
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Status</label>
@@ -56,13 +60,11 @@
                                 <span class="badge bg-danger">Out of order</span>
                             {% elif asset.status == '501' or asset.status == '502' %}
                                 <span class="badge bg-warning text-dark">Maintenance</span>
+                            {% elif asset.status == '201' or asset.status == '202' %}
+                                <span class="badge bg-info text-dark">Awaiting Action</span>
                             {% else %}
-                                <span class="badge bg-info text-dark">{{ asset.get_status_display }}</span>
+                                <span class="badge bg-light text-dark border">{{ asset.get_status_display }}</span>
                             {% endif %}
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="small text-muted text-uppercase fw-bold d-block">Tag</label>
-                            <span class="badge bg-light text-dark border">{{ asset.get_tag_display|default:"No Tag" }}</span>
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Location</label>
@@ -74,7 +76,15 @@
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Assigned To</label>
-                            {{ asset.assigned_to.get_full_name|default:asset.assigned_to.username|default:"Unassigned" }}
+                            <span class="h6">
+                                {% if asset.assigned_to.profile %}
+                                    {{ asset.assigned_to.profile.first_name }} {{ asset.assigned_to.profile.last_name }}
+                                {% elif asset.assigned_to %}
+                                    {{ asset.assigned_to.email }}
+                                {% else %}
+                                    Unassigned
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
 
@@ -142,7 +152,13 @@
                                     <small class="text-muted">{{ log.timestamp|date:"M d, Y" }}</small>
                                 </div>
                                 <p class="mb-1 small text-muted">{{ log.notes }}</p>
-                                <small class="text-muted">By: {{ log.user.get_full_name|default:log.user.username }}</small>
+                                <small class="text-muted">By: 
+                                    {% if log.user.profile %}
+                                        {{ log.user.profile.first_name }} {{ log.user.profile.last_name }}
+                                    {% else %}
+                                        {{ log.user.email|default:"System" }}
+                                    {% endif %}
+                                </small>
                             </li>
                         {% empty %}
                             <li class="list-group-item text-center py-5 text-muted small">

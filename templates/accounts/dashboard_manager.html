@@ -107,13 +107,33 @@
                                             #{{ wo.id }}
                                         </a>
                                     </td>
-                                    <td>{{ wo.asset.name|default:wo.asset_text|truncatechars:30 }}</td>
                                     <td>
-                                        <span class="badge bg-{% if wo.priority == 'CRITICAL' %}danger{% elif wo.priority == 'HIGH' %}warning{% else %}info{% endif %}">
+                                        {% if wo.asset %}
+                                            {{ wo.asset.name|truncatechars:30 }}
+                                        {% elif wo.room %}
+                                            {{ wo.room.name|truncatechars:30 }}
+                                        {% elif wo.building %}
+                                            {{ wo.building.name|truncatechars:30 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if wo.priority == '4' %}danger{% elif wo.priority == '3' %}warning{% else %}info{% endif %}">
                                             {{ wo.get_priority_display }}
                                         </span>
                                     </td>
-                                    <td>{{ wo.assigned_to.email|default:"-" }}</td>
+                                    <td>
+                                        {% if wo.assigned_to %}
+                                            {% if wo.assigned_to.profile.first_name or wo.assigned_to.profile.last_name %}
+                                                {{ wo.assigned_to.profile.first_name }} {{ wo.assigned_to.profile.last_name }}
+                                            {% else %}
+                                                {{ wo.assigned_to.email }}
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">Unassigned</span>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <span class="badge bg-secondary">{{ wo.get_status_display }}</span>
                                     </td>

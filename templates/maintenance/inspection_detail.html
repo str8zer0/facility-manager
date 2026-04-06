@@ -62,7 +62,15 @@
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Inspector</label>
-                            <span class="h6">{{ inspection.performed_by.get_full_name|default:inspection.performed_by.email|default:"Unassigned" }}</span>
+                            <span class="h6">
+                                {% if inspection.performed_by.profile.first_name or inspection.performed_by.profile.last_name %}
+                                    {{ inspection.performed_by.profile.first_name }} {{ inspection.performed_by.profile.last_name }}
+                                {% elif inspection.performed_by %}
+                                    {{ inspection.performed_by.email }}
+                                {% else %}
+                                    <span class="text-muted italic">Unassigned</span>
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Scheduled For</label>

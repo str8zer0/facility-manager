@@ -32,23 +32,19 @@
                                 {% for error in form.name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.category.id_for_label }}" class="form-label fw-semibold">{{ form.category.label }}</label>
-                                {{ form.category }}
-                                {% for error in form.category.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                <label for="{{ form.categories.id_for_label }}" class="form-label fw-semibold">{{ form.categories.label }}</label>
+                                {{ form.categories }}
+                                <div class="form-text small">{{ form.categories.help_text }}</div>
+                                {% for error in form.categories.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                             </div>
                             
                             <!-- Status & Location -->
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">{{ form.status.label }}</label>
                                 {{ form.status }}
                                 {% for error in form.status.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.tag.id_for_label }}" class="form-label fw-semibold">{{ form.tag.label }}</label>
-                                {{ form.tag }}
-                                {% for error in form.tag.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                            </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.room.id_for_label }}" class="form-label fw-semibold">{{ form.room.label }}</label>
                                 {{ form.room }}
                                 {% for error in form.room.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}

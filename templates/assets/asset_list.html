@@ -17,7 +17,7 @@
     <div class="card border-0 shadow-sm mb-4 mx-3">
         <div class="card-body">
             <form method="get" class="row g-3">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="category" class="form-label small fw-bold text-uppercase text-muted">Category</label>
                     <select name="category" id="category" class="form-select form-select-sm">
                         <option value="">All Categories</option>
@@ -28,7 +28,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label for="status" class="form-label small fw-bold text-uppercase text-muted">Status</label>
                     <select name="status" id="status" class="form-select form-select-sm">
                         <option value="">All Statuses</option>
@@ -40,17 +40,6 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="tag" class="form-label small fw-bold text-uppercase text-muted">Tag</label>
-                    <select name="tag" id="tag" class="form-select form-select-sm">
-                        <option value="">All Tags</option>
-                        {% for value, label in tag_choices %}
-                            <option value="{{ value }}" {% if current_filters.tag == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
                     <label for="is_active" class="form-label small fw-bold text-uppercase text-muted">Active</label>
                     <select name="is_active" id="is_active" class="form-select form-select-sm">
                         <option value="">All</option>
@@ -96,9 +85,13 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-dark border">
-                                        {{ asset.category.name|default:"Uncategorized" }}
-                                    </span>
+                                    {% for cat in asset.categories.all %}
+                                        <span class="badge bg-light text-dark border">
+                                            {{ cat.name }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-muted small">Uncategorized</span>
+                                    {% endfor %}
                                 </td>
                                 <td>
                                     {% if asset.room %}
@@ -117,8 +110,10 @@
                                         <span class="badge bg-danger">Out of order</span>
                                     {% elif asset.status == '501' or asset.status == '502' %}
                                         <span class="badge bg-warning text-dark">Maintenance</span>
+                                    {% elif asset.status == '201' or asset.status == '202' %}
+                                        <span class="badge bg-info text-dark">Awaiting Action</span>
                                     {% else %}
-                                        <span class="badge bg-info text-dark">{{ asset.get_status_display }}</span>
+                                        <span class="badge bg-light text-dark border">{{ asset.get_status_display }}</span>
                                     {% endif %}
                                 </td>
                                 <td>

@@ -39,8 +39,10 @@
                     <div class="mb-3">
                         <label class="text-muted small text-uppercase fw-bold">Manager</label>
                         <div>
-                            {% if building.manager %}
-                                <i class="fas fa-user-tie me-2"></i>{{ building.manager.get_full_name|default:building.manager.email }}
+                            {% if building.manager.profile %}
+                                <i class="fas fa-user-tie me-2"></i>{{ building.manager.profile.first_name }} {{ building.manager.profile.last_name }}
+                            {% elif building.manager %}
+                                <i class="fas fa-user-tie me-2"></i>{{ building.manager.email }}
                             {% else %}
                                 <span class="text-muted small italic">No manager assigned</span>
                             {% endif %}

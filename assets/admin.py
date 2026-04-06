@@ -14,16 +14,14 @@ class AssetCategoryAdmin(admin.ModelAdmin):
 class AssetAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "category",
+        "get_categories",
         "room",
-        "tag_display",
         "status_display",
         "is_active",
         "assigned_to",
     )
     list_filter = (
-        "category",
-        "tag",
+        "categories",
         "status",
         "is_active",
         "room__building",
@@ -36,14 +34,13 @@ class AssetAdmin(admin.ModelAdmin):
         "model_number",
         "assigned_to__email",
     )
-    autocomplete_fields = ("category", "room", "assigned_to")
+    autocomplete_fields = ("room", "assigned_to")
     inlines = [HistoryInline]
     ordering = ("name",)
 
-    # Display human-readable labels for tag and status
-    def tag_display(self, obj):
-        return obj.get_tag_display()
-    tag_display.short_description = "Tag"
+    def get_categories(self, obj):
+        return ", ".join([c.name for c in obj.categories.all()])
+    get_categories.short_description = "Categories"
 
     def status_display(self, obj):
         return obj.get_status_display()

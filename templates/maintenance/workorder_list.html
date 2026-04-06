@@ -37,6 +37,7 @@
                         {% endfor %}
                     </select>
                 </div>
+                {% if user.role != 'TECHNICIAN' %}
                 <div class="col-md-4">
                     <label for="assigned_to" class="form-label small fw-bold text-uppercase text-muted">Assigned To</label>
                     <select name="assigned_to" id="assigned_to" class="form-select form-select-sm">
@@ -48,6 +49,7 @@
                         {% endfor %}
                     </select>
                 </div>
+                {% endif %}
                 <div class="col-md-2 d-flex align-items-end">
                     <div class="d-grid gap-2 d-md-block">
                         <button type="submit" class="btn btn-sm btn-secondary">
@@ -108,17 +110,25 @@
                                         <span class="badge bg-success">Completed</span>
                                     {% elif wo.status == 'IN_PROGRESS' %}
                                         <span class="badge bg-primary">In Progress</span>
+                                    {% elif wo.status == 'ON_HOLD' %}
+                                        <span class="badge bg-warning text-dark">On Hold</span>
+                                    {% elif wo.status == 'AWAITING_PARTS' %}
+                                        <span class="badge bg-info text-dark">Awaiting Parts</span>
                                     {% elif wo.status == 'OPEN' %}
                                         <span class="badge bg-secondary">Open</span>
-                                    {% elif wo.status == 'ON_HOLD' or wo.status == 'AWAITING_PARTS' %}
-                                        <span class="badge bg-warning text-dark">{{ wo.get_status_display }}</span>
+                                    {% elif wo.status == 'CANCELLED' %}
+                                        <span class="badge bg-danger">Cancelled</span>
                                     {% else %}
                                         <span class="badge bg-light text-dark border">{{ wo.get_status_display }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if wo.assigned_to %}
-                                        {{ wo.assigned_to.get_full_name|default:wo.assigned_to.email }}
+                                        {% if wo.assigned_to.profile.first_name or wo.assigned_to.profile.last_name %}
+                                            {{ wo.assigned_to.profile.first_name }} {{ wo.assigned_to.profile.last_name }}
+                                        {% else %}
+                                            {{ wo.assigned_to.email }}
+                                        {% endif %}
                                     {% else %}
                                         <span class="text-muted small">Unassigned</span>
                                     {% endif %}

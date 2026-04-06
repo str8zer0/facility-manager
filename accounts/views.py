@@ -1,8 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, TemplateView, UpdateView, DeleteView
 from accounts.forms import RegisterForm, ProfileForm, UserRoleAddForm, UserRoleForm, AdminProfileForm
 from accounts.mixins import AdminRequiredMixin, ManagerRequiredMixin, TechnicianRequiredMixin, StaffRequiredMixin
@@ -21,9 +23,10 @@ class UserLoginView(LoginView):
         return reverse_lazy("accounts:dashboard")
 
     def form_valid(self, form):
-        from django.contrib import messages
         user = form.get_user()
         if not user.email_verified:
+            # Store user ID in session to allow resending without logging in
+            self.request.session['pending_verification_user_pk'] = user.pk
             messages.error(
                 self.request,
                 "Please verify your email before logging in. "
@@ -45,7 +48,6 @@ class RegisterView(CreateView):
     success_url = reverse_lazy("accounts:login")
 
     def form_valid(self, form):
-        from django.contrib import messages
         response = super().form_valid(form)
 
         # Send verification email asynchronously
@@ -64,7 +66,6 @@ class VerifyEmailView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         from django.core.signing import TimestampSigner, SignatureExpired, BadSignature
-        from django.contrib import messages
 
         token = kwargs.get("token")
         signer = TimestampSigner()
@@ -90,20 +91,24 @@ class VerifyEmailView(TemplateView):
         return redirect(reverse_lazy("accounts:login"))
 
 
-class ResendVerificationView(LoginRequiredMixin, TemplateView):
-    template_name = "accounts/resend_verification.html"
-
-    def post(self, request, *args, **kwargs):
-        from django.contrib import messages
+class ResendVerificationView(View):
+    def get(self, request, *args, **kwargs):
         from accounts.tasks import send_verification_email
 
-        if request.user.email_verified:
-            messages.info(request, "Your email is already verified.")
-        else:
-            send_verification_email.delay(request.user.pk)
-            messages.success(request, "Verification email sent. Please check your inbox.")
+        # For unverified users who just failed login, retrieve PK from session
+        user_pk = request.session.get('pending_verification_user_pk')
+        user = User.objects.filter(pk=user_pk).first() if user_pk else None
 
-        return redirect(reverse_lazy("accounts:profile"))
+        if user:
+            if user.email_verified:
+                messages.info(request, "Your email is already verified.")
+            else:
+                send_verification_email.delay(user.pk)
+                messages.success(request, "Verification email sent. Please check your inbox.")
+        else:
+            messages.error(request, "Unable to resend verification. Please try logging in again.")
+
+        return redirect(reverse_lazy("accounts:login"))
 
 
 # ─────────────────────────────────────────────
@@ -306,7 +311,7 @@ class TechnicianDashboardView(TechnicianRequiredMixin, TemplateView):
             .order_by("-updated_at")[:5]
         )
 
-        # Work orders created by this technician
+        # Work orders created by this technician (limited to 5)
         context["created_work_orders"] = (
             WorkOrder.objects
             .filter(created_by=user, is_active=True)
@@ -650,7 +655,6 @@ class UserProfileUpdateView(AdminRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from django.shortcuts import get_object_or_404
         context["target_user"] = get_object_or_404(User, pk=self.kwargs["pk"])
         return context
 
@@ -659,7 +663,6 @@ class UserDeactivateView(AdminRequiredMixin, TemplateView):
     template_name = "accounts/user_confirm_deactivate.html"
 
     def get_object(self):
-        from django.shortcuts import get_object_or_404
         return get_object_or_404(User, pk=self.kwargs["pk"])
 
     def get_context_data(self, **kwargs):
@@ -668,7 +671,6 @@ class UserDeactivateView(AdminRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        from django.contrib import messages
         target_user = self.get_object()
 
         # Prevent admin from deactivating themselves

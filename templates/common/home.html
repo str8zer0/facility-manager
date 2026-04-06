@@ -9,8 +9,12 @@
             <h1 class="display-4 fw-bold lh-1 mb-3">Maintenance Management System</h1>
             <p class="lead">Efficiently manage your assets, inventory, and work orders in one centralized platform. Designed for Admins, Managers, Technicians, and Staff.</p>
             <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg px-4 me-md-2">Login</a>
-                <a href="{% url 'accounts:register' %}" class="btn btn-outline-secondary btn-lg px-4">Register</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:dashboard' %}" class="btn btn-primary btn-lg px-4 me-md-2">Go to Dashboard</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg px-4 me-md-2">Login</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-outline-secondary btn-lg px-4">Register</a>
+                {% endif %}
             </div>
         </div>
         <div class="col-10 col-sm-8 col-lg-6 mx-auto">

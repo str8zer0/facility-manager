@@ -35,7 +35,7 @@
                             <td>{{ building.address|default:"—" }}</td>
                             <td>
                                 {% if building.manager %}
-                                    <span class="badge bg-info text-dark">{{ building.manager.get_full_name|default:building.manager.email }}</span>
+                                    <span class="badge bg-info text-dark">{{ building.manager.profile.first_name|default:'' }} {{ building.manager.profile.last_name|default:'' }} {% if not building.manager.profile %}{{ building.manager.email }}{% endif %}</span>
                                 {% else %}
                                     <span class="text-muted small">No manager</span>
                                 {% endif %}

@@ -2,7 +2,7 @@ from django.db import models
 from accounts.models import User
 from common.models import History
 from facilities.models import Room
-from assets.choices import TagName, StatusCode
+from assets.choices import StatusCode
 
 
 class AssetCategory(models.Model):
@@ -18,11 +18,10 @@ class AssetCategory(models.Model):
 
 class Asset(models.Model):
     name = models.CharField(max_length=255)
-    category = models.ForeignKey(
+    categories = models.ManyToManyField(
         "AssetCategory",
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="assets"
+        related_name="assets",
+        blank=True
     )
     room = models.ForeignKey(
         Room,
@@ -31,7 +30,6 @@ class Asset(models.Model):
         blank=True,
         related_name="assets"
     )
-    tag = models.CharField(max_length=50, choices=TagName, null=True, blank=True)
     status = models.CharField(max_length=50, choices=StatusCode, default=StatusCode.OPERATIONAL)
     serial_number = models.CharField(max_length=255, blank=True)
     manufacturer = models.CharField(max_length=255, blank=True)
@@ -52,7 +50,7 @@ class Asset(models.Model):
     notes = models.TextField(blank=True)
 
     class Meta:
-        ordering = ["category__name", "name"]
+        ordering = ["name"]
 
     def log(self, user, action, notes=""):
         History.objects.create(

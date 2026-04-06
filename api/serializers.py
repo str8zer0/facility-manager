@@ -15,30 +15,33 @@ class AssetCategorySerializer(serializers.ModelSerializer):
 
 
 class AssetListSerializer(serializers.ModelSerializer):
-    category = AssetCategorySerializer(read_only=True)
-    category_id = serializers.PrimaryKeyRelatedField(
+    categories = AssetCategorySerializer(many=True, read_only=True)
+    category_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
         queryset=AssetCategory.objects.all(),
-        source="category",
-        write_only=True
+        source="categories",
+        write_only=True,
+        required=False
     )
     status_display = serializers.CharField(source="get_status_display", read_only=True)
-    tag_display = serializers.CharField(source="get_tag_display", read_only=True)
     room = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Asset
         fields = [
-            "id", "name", "category", "category_id", "room",
-            "status", "status_display", "tag", "tag_display", "is_active",
+            "id", "name", "categories", "category_ids", "room",
+            "status", "status_display", "is_active",
         ]
 
 
 class AssetDetailSerializer(serializers.ModelSerializer):
-    category = AssetCategorySerializer(read_only=True)
-    category_id = serializers.PrimaryKeyRelatedField(
+    categories = AssetCategorySerializer(many=True, read_only=True)
+    category_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
         queryset=AssetCategory.objects.all(),
-        source="category",
-        write_only=True
+        source="categories",
+        write_only=True,
+        required=False
     )
     room = serializers.StringRelatedField(read_only=True)
     room_id = serializers.IntegerField(source="room.id", read_only=True)
@@ -51,15 +54,13 @@ class AssetDetailSerializer(serializers.ModelSerializer):
         allow_null=True,
     )
     status_display = serializers.CharField(source="get_status_display", read_only=True)
-    tag_display = serializers.CharField(source="get_tag_display", read_only=True)
 
     class Meta:
         model = Asset
         fields = [
             "id", "name",
-            "category", "category_id",
+            "categories", "category_ids",
             "room", "room_id",
-            "tag", "tag_display",
             "status", "status_display",
             "serial_number", "manufacturer", "model_number",
             "purchase_date", "installation_date", "warranty_expiration",

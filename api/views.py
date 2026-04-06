@@ -28,15 +28,16 @@ class AssetViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [IsAuthenticated, IsManagerOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ["status", "tag", "is_active", "category"]
+    filterset_fields = ["status", "is_active", "categories"]
     search_fields = ["name", "serial_number", "manufacturer", "model_number"]
-    ordering_fields = ["name", "status", "category__name"]
+    ordering_fields = ["name", "status"]
     ordering = ["name"]
 
     def get_queryset(self):
         return (
             Asset.objects
-            .select_related("category", "room__building", "assigned_to")
+            .prefetch_related("categories")
+            .select_related("room__building", "assigned_to")
             .all()
         )
 

@@ -23,11 +23,11 @@ class AssetCategoryForm(forms.ModelForm):
 # ─────────────────────────────────────────────
 
 class AssetForm(forms.ModelForm):
-    category = forms.ModelChoiceField(
+    categories = forms.ModelMultipleChoiceField(
         queryset=AssetCategory.objects.all().order_by("name"),
-        required=True,
-        empty_label="— Select category —",
-        widget=forms.Select(attrs={"class": "form-select"}),
+        required=False,
+        widget=forms.SelectMultiple(attrs={"class": "form-select", "size": "5"}),
+        help_text="Hold down 'Control', or 'Command' on a Mac, to select more than one."
     )
     room = forms.ModelChoiceField(
         queryset=Room.objects.select_related("building").order_by("building__name", "name"),
@@ -45,14 +45,13 @@ class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
         fields = [
-            "name", "category", "room", "tag", "status",
+            "name", "categories", "room", "status",
             "serial_number", "manufacturer", "model_number",
             "purchase_date", "installation_date", "warranty_expiration",
             "assigned_to", "is_active", "notes",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Asset name"}),
-            "tag": forms.Select(attrs={"class": "form-select"}),
             "status": forms.Select(attrs={"class": "form-select"}),
             "serial_number": forms.TextInput(attrs={"class": "form-control"}),
             "manufacturer": forms.TextInput(attrs={"class": "form-control"}),

@@ -112,14 +112,14 @@ class SparePartListView(TechnicianRequiredMixin, ListView):
 class SparePartDetailView(TechnicianRequiredMixin, DetailView):
     model = SparePart
     template_name = "inventory/sparepart_detail.html"
-    context_object_name = "part"
+    context_object_name = "sparepart"
 
     def get_queryset(self):
         return super().get_queryset().select_related("supplier")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["movements"] = self.object.movements_for_part.select_related("work_order").all()[:20]
+        context["movements"] = self.object.movements.select_related("work_order").all()[:20]
         context["movement_form"] = StockMovementForm(part=self.object)
         context["is_low_stock"] = self.object.quantity <= self.object.minimum_quantity
         return context

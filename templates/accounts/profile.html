@@ -35,6 +35,7 @@
                         {% endif %}
                     </h2>
                     <p class="text-muted mb-3">{{ user.profile.job.title|default:"No title set" }}</p>
+                    <p class="text-muted mb-3 small">{{ user.email }}</p>
                     <div class="d-grid">
                         <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">
                             <i class="fas fa-user-edit me-1"></i> Edit Profile
@@ -112,14 +113,6 @@
                     <hr class="text-muted">
 
                     <div class="row g-4">
-                        <div class="col-sm-6">
-                            <label class="small text-muted text-uppercase fw-bold d-block">Account Status</label>
-                            {% if user.is_active %}
-                                <span class="badge bg-success">Active</span>
-                            {% else %}
-                                <span class="badge bg-danger">Inactive</span>
-                            {% endif %}
-                        </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Member Since</label>
                             <span class="h6 text-muted">{{ user.date_joined|date:"F d, Y" }}</span>

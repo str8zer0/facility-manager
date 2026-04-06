@@ -11,19 +11,24 @@
                 <h5 class="p-2 text-muted border-bottom">Admin Tools</h5>
                 <ul class="nav flex-column mt-3">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#"><i class="fas fa-users me-2"></i> User Management</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard_admin' %}active{% endif %}" href="{% url 'accounts:dashboard_admin' %}">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard Overview
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-database me-2"></i> System Logs</a>
+                        <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'accounts:user_list' %}">
+                            <i class="fas fa-users me-2"></i> User Management
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-cog me-2"></i> System Settings</a>
+                        <a class="nav-link {% if 'department' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'accounts:department_list' %}">
+                            <i class="fas fa-sitemap me-2"></i> Departments
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-shield-alt me-2"></i> Roles & Permissions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-danger" href="#"><i class="fas fa-exclamation-triangle me-2"></i> Backup & Reset</a>
+                        <a class="nav-link {% if 'job' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'accounts:job_list' %}">
+                            <i class="fas fa-briefcase me-2"></i> Jobs
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -34,9 +39,15 @@
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Admin Dashboard</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-download me-1"></i> Export Data
-                    </button>
+                    <a href="{% url 'accounts:user_create' %}" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fas fa-user-plus me-1"></i> Add User
+                    </a>
+                    <a href="{% url 'accounts:department_create' %}" class="btn btn-sm btn-outline-secondary me-2">
+                        <i class="fas fa-plus me-1"></i> Add Department
+                    </a>
+                    <a href="{% url 'accounts:job_create' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-plus me-1"></i> Add Job
+                    </a>
                 </div>
             </div>
 
@@ -124,7 +135,17 @@
                                 {% for log in recent_logs %}
                                 <tr>
                                     <td>{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
-                                    <td>{{ log.user.email|default:"System" }}</td>
+                                    <td>
+                                        {% if log.user %}
+                                            {% if log.user.profile.first_name or log.user.profile.last_name %}
+                                                {{ log.user.profile.first_name }} {{ log.user.profile.last_name }}
+                                            {% else %}
+                                                {{ log.user.email }}
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">System</span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ log.action }}</td>
                                     <td>
                                         <span class="badge bg-info">{{ log.content_type.model|title }}</span>
@@ -139,7 +160,7 @@
                         </table>
                     </div>
                     <div class="text-end mt-2">
-                        <a href="#" class="btn btn-link btn-sm">View All Logs</a>
+                        <span class="text-muted small">Showing last 50 entries</span>
                     </div>
                 </div>
             </div>

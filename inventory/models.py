@@ -26,6 +26,11 @@ class SparePart(models.Model):
     )
     quantity = models.IntegerField(default=0)
     minimum_quantity = models.IntegerField(default=1)
+    work_orders = models.ManyToManyField(
+        WorkOrder,
+        through="StockMovement",
+        related_name="spare_parts"
+    )
 
     class Meta:
         ordering = ["name"]
@@ -38,16 +43,16 @@ class StockMovement(models.Model):
     part = models.ForeignKey(
         SparePart,
         on_delete=models.CASCADE,
-        related_name="movements_for_part"
+        related_name="movements"
     )
     change = models.IntegerField()   # negative or positive
     reason = models.CharField(max_length=50, choices=Reason)
     work_order = models.ForeignKey(
         WorkOrder,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="movements_for_work_order"
+        related_name="stock_movements"
     )
     timestamp = models.DateTimeField(auto_now_add=True)
 

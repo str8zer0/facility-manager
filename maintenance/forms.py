@@ -59,6 +59,7 @@ class WorkOrderForm(forms.ModelForm):
         if user:
             # Technicians — lock assignment to themselves
             if user.groups.filter(name="Technician").exists():
+                self.fields["assigned_to"].initial = user
                 self.fields["assigned_to"].widget.attrs["disabled"] = True
                 self.fields["assigned_to"].required = False
 

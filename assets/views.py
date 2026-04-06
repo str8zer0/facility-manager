@@ -71,34 +71,29 @@ class AssetListView(StaffRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = super().get_queryset().select_related("category", "room__building", "assigned_to")
+        qs = super().get_queryset().prefetch_related("categories").select_related("room__building", "assigned_to")
 
         category = self.request.GET.get("category")
         status = self.request.GET.get("status")
-        tag = self.request.GET.get("tag")
         is_active = self.request.GET.get("is_active")
 
         if category:
-            qs = qs.filter(category__pk=category)
+            qs = qs.filter(categories__pk=category)
         if status:
             qs = qs.filter(status=status)
-        if tag:
-            qs = qs.filter(tag=tag)
         if is_active in ("true", "false"):
             qs = qs.filter(is_active=(is_active == "true"))
 
-        return qs
+        return qs.distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from .choices import TagName, StatusCode
+        from .choices import StatusCode
         context["categories"] = AssetCategory.objects.all()
-        context["tag_choices"] = TagName.choices
         context["status_choices"] = StatusCode.choices
         context["current_filters"] = {
             "category": self.request.GET.get("category", ""),
             "status": self.request.GET.get("status", ""),
-            "tag": self.request.GET.get("tag", ""),
             "is_active": self.request.GET.get("is_active", ""),
         }
         return context
@@ -110,8 +105,8 @@ class AssetDetailView(StaffRequiredMixin, DetailView):
     context_object_name = "asset"
 
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            "category", "room__building", "assigned_to"
+        return super().get_queryset().prefetch_related("categories").select_related(
+            "room__building", "assigned_to"
         )
 
 

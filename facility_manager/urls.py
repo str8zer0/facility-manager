@@ -20,6 +20,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
+handler404 = 'common.views.handler404'
+handler500 = 'common.views.handler500'
+
+
 urlpatterns = [
     path("", include("common.urls")),
     path("accounts/", include("accounts.urls")),

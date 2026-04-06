@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Work Order: {{ workorder.title }}{% endblock %}
+{% block title %}Work Order: {{ work_order.title }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -36,10 +36,16 @@
                                 <span class="badge bg-success">Completed</span>
                             {% elif work_order.status == 'IN_PROGRESS' %}
                                 <span class="badge bg-primary">In Progress</span>
+                            {% elif work_order.status == 'ON_HOLD' %}
+                                <span class="badge bg-warning text-dark">On Hold</span>
+                            {% elif work_order.status == 'AWAITING_PARTS' %}
+                                <span class="badge bg-info text-dark">Awaiting Parts</span>
                             {% elif work_order.status == 'OPEN' %}
                                 <span class="badge bg-secondary">Open</span>
+                            {% elif work_order.status == 'CANCELLED' %}
+                                <span class="badge bg-danger">Cancelled</span>
                             {% else %}
-                                <span class="badge bg-warning text-dark">{{ work_order.get_status_display }}</span>
+                                <span class="badge bg-light text-dark">{{ work_order.get_status_display }}</span>
                             {% endif %}
                         </div>
                     </div>
@@ -66,7 +72,15 @@
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Assigned To</label>
-                            <span class="h6">{{ work_order.assigned_to.get_full_name|default:work_order.assigned_to.email|default:"Unassigned" }}</span>
+                            <span class="h6">
+                                {% if work_order.assigned_to.profile.first_name or work_order.assigned_to.profile.last_name %}
+                                    {{ work_order.assigned_to.profile.first_name }} {{ work_order.assigned_to.profile.last_name }}
+                                {% elif work_order.assigned_to %}
+                                    {{ work_order.assigned_to.email }}
+                                {% else %}
+                                    <span class="text-muted italic">Unassigned</span>
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Due Date</label>
@@ -76,7 +90,15 @@
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Created By</label>
-                            <span class="small">{{ work_order.created_by.get_full_name|default:work_order.created_by.email }}</span>
+                            <span class="small">
+                                {% if work_order.created_by.profile.first_name or work_order.created_by.profile.last_name %}
+                                    {{ work_order.created_by.profile.first_name }} {{ work_order.created_by.profile.last_name }}
+                                {% elif work_order.created_by %}
+                                    {{ work_order.created_by.email }}
+                                {% else %}
+                                    System
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Created At</label>
@@ -111,7 +133,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for movement in work_order.movements_for_work_order.all %}
+                                {% for movement in work_order.stock_movements.all %}
                                     <tr>
                                         <td class="ps-4">
                                             <a href="{% url 'inventory:sparepart_detail' movement.part.pk %}" class="text-decoration-none">
@@ -131,7 +153,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-white border-top py-3">
-                    <a href="{% url 'inventory:movement_list' %}?work_order={{ work_order.pk }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-plus me-1"></i> Log Part Usage
                     </a>
                 </div>
@@ -148,12 +170,20 @@
                             <div class="d-flex mb-3">
                                 <div class="flex-shrink-0">
                                     <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                        {{ comment.user.email|first|upper }}
+                                        {{ comment.user.email|default:"U"|first|upper }}
                                     </div>
                                 </div>
                                 <div class="ms-3 p-3 bg-light rounded w-100">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="fw-bold small">{{ comment.user.get_full_name|default:comment.user.email }}</span>
+                                        <span class="fw-bold small">
+                                            {% if comment.user.profile.first_name or comment.user.profile.last_name %}
+                                                {{ comment.user.profile.first_name }} {{ comment.user.profile.last_name }}
+                                            {% elif comment.user %}
+                                                {{ comment.user.email }}
+                                            {% else %}
+                                                Deleted User
+                                            {% endif %}
+                                        </span>
                                         <small class="text-muted">{{ comment.timestamp|date:"M d, Y H:i" }}</small>
                                     </div>
                                     <div class="small">{{ comment.comment|linebreaksbr }}</div>
@@ -197,7 +227,15 @@
                                     <small class="text-muted">{{ log.timestamp|date:"M d, Y" }}</small>
                                 </div>
                                 <p class="mb-1 small text-muted">{{ log.notes }}</p>
-                                <small class="text-muted">By: {{ log.user.get_full_name|default:log.user.email }}</small>
+                                <small class="text-muted">By: 
+                                    {% if log.user.profile.first_name or log.user.profile.last_name %}
+                                        {{ log.user.profile.first_name }} {{ log.user.profile.last_name }}
+                                    {% elif log.user %}
+                                        {{ log.user.email }}
+                                    {% else %}
+                                        System
+                                    {% endif %}
+                                </small>
                             </li>
                         {% empty %}
                             <li class="list-group-item text-center py-5 text-muted small">

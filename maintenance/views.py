@@ -21,8 +21,13 @@ class WorkOrderListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = super().get_queryset().select_related(
-            "building", "room", "asset", "created_by", "assigned_to"
+            "building", "room", "asset", "created_by", "assigned_to", "assigned_to__profile"
         )
+
+        # Restrict technicians to only see their assigned work orders
+        if self.request.user.groups.filter(name="Technician").exists():
+            qs = qs.filter(assigned_to=self.request.user)
+
         status = self.request.GET.get("status")
         priority = self.request.GET.get("priority")
         assigned_to = self.request.GET.get("assigned_to")
@@ -60,9 +65,15 @@ class WorkOrderDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "work_order"
 
     def get_queryset(self):
-        return super().get_queryset().select_related(
-            "building", "room", "asset", "created_by", "assigned_to"
-        ).prefetch_related("comments__user")
+        qs = super().get_queryset().select_related(
+            "building", "room", "asset", "created_by", "created_by__profile", "assigned_to", "assigned_to__profile"
+        ).prefetch_related("comments__user", "comments__user__profile")
+
+        # Restrict technicians to only see their assigned work orders
+        if self.request.user.groups.filter(name="Technician").exists():
+            qs = qs.filter(assigned_to=self.request.user)
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -166,8 +177,10 @@ class WorkOrderDeleteView(ManagerRequiredMixin, DeleteView):
     success_url = reverse_lazy("maintenance:workorder_list")
 
     def form_valid(self, form):
-        messages.success(self.request, f'Work order "{self.object.title}" deleted.')
-        return super().form_valid(form)
+        title = self.get_object().title
+        response = super().form_valid(form)
+        messages.success(self.request, f'Work order "{title}" deleted.')
+        return response
 
 
 class WorkOrderCommentCreateView(LoginRequiredMixin, CreateView):
@@ -175,7 +188,7 @@ class WorkOrderCommentCreateView(LoginRequiredMixin, CreateView):
     form_class = WorkOrderCommentForm
 
     def get_work_order(self):
-        return get_object_or_404(WorkOrder, pk=self.kwargs["work_order_pk"])
+        return get_object_or_404(WorkOrder, pk=self.kwargs["pk"])
 
     def form_valid(self, form):
         form.instance.work_order = self.get_work_order()
@@ -184,11 +197,11 @@ class WorkOrderCommentCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy("maintenance:workorder_detail", kwargs={"pk": self.kwargs["work_order_pk"]})
+        return reverse_lazy("maintenance:workorder_detail", kwargs={"pk": self.kwargs["pk"]})
 
     def form_invalid(self, form):
         messages.error(self.request, "Comment could not be saved. Please try again.")
-        return redirect(reverse_lazy("maintenance:workorder_detail", kwargs={"pk": self.kwargs["work_order_pk"]}))
+        return redirect(reverse_lazy("maintenance:workorder_detail", kwargs={"pk": self.kwargs["pk"]}))
 
 
 # ─────────────────────────────────────────────
@@ -203,7 +216,7 @@ class InspectionListView(TechnicianRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = super().get_queryset().select_related(
-            "performed_by", "building", "room", "asset"
+            "performed_by", "performed_by__profile", "building", "room", "asset"
         )
         status = self.request.GET.get("status")
         performed_by = self.request.GET.get("performed_by")
@@ -235,7 +248,7 @@ class InspectionDetailView(TechnicianRequiredMixin, DetailView):
 
     def get_queryset(self):
         return super().get_queryset().select_related(
-            "performed_by", "building", "room", "asset"
+            "building", "room", "asset", "performed_by", "performed_by__profile"
         )
 
 
@@ -248,8 +261,9 @@ class InspectionCreateView(TechnicianRequiredMixin, CreateView):
         return reverse_lazy("maintenance:inspection_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
+        response = super().form_valid(form)
         messages.success(self.request, f'Inspection "{self.object.title}" scheduled successfully.')
-        return super().form_valid(form)
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -266,8 +280,9 @@ class InspectionUpdateView(TechnicianRequiredMixin, UpdateView):
         return reverse_lazy("maintenance:inspection_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
+        response = super().form_valid(form)
         messages.success(self.request, f'Inspection "{self.object.title}" updated successfully.')
-        return super().form_valid(form)
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -282,5 +297,7 @@ class InspectionDeleteView(ManagerRequiredMixin, DeleteView):
     success_url = reverse_lazy("maintenance:inspection_list")
 
     def form_valid(self, form):
-        messages.success(self.request, f'Inspection "{self.object.title}" deleted.')
-        return super().form_valid(form)
+        title = self.object.title
+        response = super().form_valid(form)
+        messages.success(self.request, f'Inspection "{title}" deleted.')
+        return response

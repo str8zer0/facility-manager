@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Spare Part: {{ part.name }}{% endblock %}
+{% block title %}Spare Part: {{ sparepart.name }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -9,18 +9,18 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Spare Parts</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ part.name }}</li>
+                <li class="breadcrumb-item active" aria-current="page">{{ sparepart.name }}</li>
             </ol>
         </nav>
         <div class="mt-2 mt-md-0">
-            <a href="{% url 'inventory:movement_create' part.pk %}" class="btn btn-primary me-2">
+            <a href="{% url 'inventory:movement_create' sparepart.pk %}" class="btn btn-primary me-2">
                 <i class="fas fa-exchange-alt me-1"></i> Log Movement
             </a>
             {% if user.role == 'ADMIN' or user.role == 'MANAGER' %}
-                <a href="{% url 'inventory:sparepart_edit' part.pk %}" class="btn btn-outline-secondary me-2">
+                <a href="{% url 'inventory:sparepart_edit' sparepart.pk %}" class="btn btn-outline-secondary me-2">
                     <i class="fas fa-edit me-1"></i> Edit
                 </a>
-                <a href="{% url 'inventory:sparepart_delete' part.pk %}" class="btn btn-outline-danger">
+                <a href="{% url 'inventory:sparepart_delete' sparepart.pk %}" class="btn btn-outline-danger">
                     <i class="fas fa-trash me-1"></i> Delete
                 </a>
             {% endif %}
@@ -38,16 +38,16 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="small text-muted text-uppercase fw-bold d-block">Name</label>
-                            <span class="h5">{{ part.name }}</span>
+                            <span class="h5">{{ sparepart.name }}</span>
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Part Number</label>
-                            <span>{{ part.part_number|default:"N/A" }}</span>
+                            <span>{{ sparepart.part_number|default:"N/A" }}</span>
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Supplier</label>
-                            {% if part.supplier %}
-                                <a href="{% url 'inventory:supplier_detail' part.supplier.pk %}">{{ part.supplier.name }}</a>
+                            {% if sparepart.supplier %}
+                                <a href="{% url 'inventory:supplier_detail' sparepart.supplier.pk %}">{{ sparepart.supplier.name }}</a>
                             {% else %}
                                 <span class="text-muted">No supplier</span>
                             {% endif %}
@@ -55,12 +55,12 @@
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Current Stock</label>
                             <span class="h4 badge {% if is_low_stock %}bg-danger{% else %}bg-success{% endif %}">
-                                {{ part.quantity }}
+                                {{ sparepart.quantity }}
                             </span>
                         </div>
                         <div class="col-sm-6">
                             <label class="small text-muted text-uppercase fw-bold d-block">Min. Quantity</label>
-                            <span>{{ part.minimum_quantity }}</span>
+                            <span>{{ sparepart.minimum_quantity }}</span>
                         </div>
                     </div>
                     {% if is_low_stock %}
@@ -79,7 +79,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
                     <h2 class="h5 mb-0">Recent Stock Movements</h2>
-                    <a href="{% url 'inventory:movement_list' %}?part={{ part.pk }}" class="btn btn-sm btn-outline-secondary">View All</a>
+                    <a href="{% url 'inventory:movement_list' %}?part={{ sparepart.pk }}" class="btn btn-sm btn-outline-secondary">View All</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">

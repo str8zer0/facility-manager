@@ -17,10 +17,14 @@ class UserRoleForm(UserChangeForm):
 
     class Meta:
         model = User
-        fields = ("email", "role", "is_active")
+        fields = ("email", "role", "is_active", "email_verified")
+        widgets = {
+            "email": forms.EmailInput(attrs={"class": "form-control", "disabled": True}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["email"].required = False
 
         # Load only role groups
         role_groups = Group.objects.filter(name__in=settings.ROLE_GROUPS)
@@ -31,6 +35,9 @@ class UserRoleForm(UserChangeForm):
             user_groups = self.instance.groups.filter(name__in=settings.ROLE_GROUPS).values_list("name", flat=True)
             if user_groups:
                 self.fields["role"].initial = user_groups[0]
+
+    def clean_email(self):
+        return self.instance.email
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -64,7 +71,7 @@ class UserRoleAddForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("email", "role", "is_active")
+        fields = ("email", "role", "is_active", "email_verified")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -136,12 +143,22 @@ class ProfileForm(forms.ModelForm):
         widgets = {
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
             "last_name": forms.TextInput(attrs={"class": "form-control"}),
-            "department": forms.Select(attrs={"class": "form-select"}),
-            "job": forms.Select(attrs={"class": "form-select"}),
+            "department": forms.Select(attrs={"class": "form-select", "disabled": True}),
+            "job": forms.Select(attrs={"class": "form-select", "disabled": True}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
             "profile_picture": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["department"].required = False
+        self.fields["job"].required = False
+
+    def clean_department(self):
+        return self.instance.department
+
+    def clean_job(self):
+        return self.instance.job
 
 class AdminProfileForm(forms.ModelForm):
     """

@@ -93,7 +93,11 @@
                                 </td>
                                 <td>
                                     {% if insp.performed_by %}
-                                        {{ insp.performed_by.get_full_name|default:insp.performed_by.email }}
+                                        {% if insp.performed_by.profile.first_name or insp.performed_by.profile.last_name %}
+                                            {{ insp.performed_by.profile.first_name }} {{ insp.performed_by.profile.last_name }}
+                                        {% else %}
+                                            {{ insp.performed_by.email }}
+                                        {% endif %}
                                     {% else %}
                                         <span class="text-muted small">Unassigned</span>
                                     {% endif %}
