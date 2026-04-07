@@ -96,13 +96,16 @@ CELERY_TIMEZONE = "UTC"
 # Email
 # ─────────────────────────────────────────────
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
-EMAIL_PORT = env.int("EMAIL_PORT", default=587)
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@facilitymanager.com")
+INSTALLED_APPS += ["anymail"]
+
+EMAIL_BACKEND = "anymail.backends.mailjet.EmailBackend"
+
+ANYMAIL = {
+    "MAILJET_API_KEY": env("MAILJET_API_KEY"),
+    "MAILJET_SECRET_KEY": env("MAILJET_SECRET_KEY"),
+}
+
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "noreply@facilitymanager.com")
 
 # ─────────────────────────────────────────────
 # Logging
