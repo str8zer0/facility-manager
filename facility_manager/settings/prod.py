@@ -105,7 +105,7 @@ ANYMAIL = {
     "MAILJET_SECRET_KEY": env("MAILJET_SECRET_KEY"),
 }
 
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "noreply@facilitymanager.com")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@facilitymanager.com")
 
 # ─────────────────────────────────────────────
 # Logging
