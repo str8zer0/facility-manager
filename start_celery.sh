@@ -2,4 +2,4 @@
 set -e
 
 echo "Starting Celery worker..."
-exec celery -A facility_manager worker --loglevel=info
+exec celery -A facility_manager worker --loglevel=info --concurrency=1 --pool=solo
