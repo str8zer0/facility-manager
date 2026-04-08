@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group, Permission
 from django.db.models.signals import post_migrate, post_save, m2m_changed
 from django.dispatch import receiver
 from accounts.models import Profile
@@ -15,6 +14,7 @@ def create_default_groups(sender, **kwargs):
     Create default user groups (roles) after migrations.
     This runs once after migrate.
     """
+    from django.contrib.auth.models import Group, Permission
     for group_name in settings.ROLE_GROUPS:
         Group.objects.get_or_create(name=group_name)
 
@@ -22,6 +22,7 @@ def create_default_groups(sender, **kwargs):
         assign_group_permissions()
 
 def assign_group_permissions():
+    from django.contrib.auth.models import Group, Permission
     admin_group = Group.objects.get(name="Admin")
     manager_group = Group.objects.get(name="Manager")
     technician_group = Group.objects.get(name="Technician")
@@ -99,6 +100,7 @@ def enforce_staff_status(sender, instance, action, **kwargs):
     Ensure only Admin group users have is_staff=True.
     Everyone else is_staff=False.
     """
+    from django.contrib.auth.models import Group
     if action not in ["post_add", "post_remove", "post_clear"]:
         return
 
